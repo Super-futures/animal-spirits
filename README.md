@@ -1,123 +1,76 @@
 # Animal Spirits
 
-A live affective observatory that reads three axes of collective state — **attention, market, and narrative** — across three regions — **United States, United Kingdom, India** — and renders them as a shared interpretive field rather than a dashboard of feeds.
+A live affective observatory mapping collective mood against economic behaviour across three regions.
 
-**Live at:** [super-futures.github.io/animal-spirits](https://super-futures.github.io/animal-spirits/)
+Three axes — attention, market, narrative — read continuously and projected into a shared field. The system doesn't predict. It traces what's moving, where, and whether it's moving together.
+
+**Live:** [super-futures.github.io/animal-spirits](https://super-futures.github.io/animal-spirits/)
+**Backend:** [super-futures/animal-spirits-api](https://github.com/super-futures/animal-spirits-api)
+**Data feed:** [state.json](https://super-futures.github.io/animal-spirits-api/data/state.json), refreshed every 15 minutes.
 
 ---
 
-## What this is
+## The three axes
 
-Animal Spirits is a research-grade visualisation that treats attention, market, and narrative as three analytically independent axes of a single collective state. Its intellectual lineage runs through Keynes' *animal spirits* — the non-rational drivers of economic action, described in Chapter 12 of the *General Theory*.
+Three analytically independent signals, held alongside each other rather than collapsed into one dial.
 
-The project is a **mirror with instrumental affordances**, not a predictive engine. A way of reading, in real time, how three heterogeneous affective signals align and misalign across three regions, and how that alignment shifts over hours and days.
+| Axis | What it reads | Source |
+|---|---|---|
+| **Attention** | Collective search and reading behaviour across four affect clusters — anxiety, confidence, aspiration, constraint | Wikimedia Pageviews API (32 articles per region, z-scored against 29-day baseline) |
+| **Market** | Regional equity state, blended with global macro stress | Alpha Vantage ETF proxies (SPY, ISF.LON, NIFTYBEES.BSE) + FRED (VIX, high-yield spread, dollar index) |
+| **Narrative** | Tone of the story carrying the moment | GDELT DOC 2.0 TimelineTone, sourcecountry-scoped |
 
-## What you see
+Each axis can lead, lag, or diverge from the others. The relationship between them is where the reading lives.
 
-The interface renders the field as spatial geometry, not as a chart.
+## Three regions
 
-- **Warm diffuse circles** — attention (size = volume, diffusion = uncertainty)
-- **Cool defined rectangles** — market (position = regime, size = conviction)
-- **Purple arrows** — narrative (direction = tone, length = volume)
-- **Offset between attention and market** encodes temporal lag: the signature of affect leading or trailing material conditions
-- **Ψ-contour line** traces the boundary between expansion and contraction zones of the latent field
-- **Posture readings** — Lean, Caution, Pause — describe the field's current invitation to action
+United States, United Kingdom, India. Three economies, three attention economies, three narrative pipelines.
 
-Three per-region panels below the map show the underlying probability decomposition: expansion / contraction / instability, along with tension, entropy, and the A↔M temporal relationship.
+## Reading the field
+
+The system renders three collective states continuously — **Expansion**, **Contraction**, **Instability** (bull, bear, stag in the Keynesian register). These aren't categorical labels but probabilities emerging from a latent field Ψ composed of the three axes.
+
+Each panel shows a **posture** — Lean, Caution, or Pause — describing not the regime itself but how the axes are holding together:
+
+- **Lean** — signals are moving together; the field is coherent
+- **Caution** — signals are out of sync; attention and markets have diverged
+- **Pause** — instability elevated; the field has lost its shape
+
+The posture is human-scale. The probabilities are the machinery.
+
+## The visual grammar
+
+- **Attention blooms** — warm, diffuse. Size encodes volume, diffusion encodes uncertainty.
+- **Market cells** — cool, defined. Position encodes regime, size encodes conviction.
+- **Narrative arrows** — direction encodes tone, length encodes volume, acceleration encodes contagion risk.
+- **A ↔ M offset** — spatial distance between attention and market forms encodes temporal lag.
+- **Ψ contour** — a faint boundary across the map where expansion tips into contraction.
+
+## What it is, what it isn't
+
+Animal Spirits is a mirror with instrumental affordances, not a predictor or a trading signal engine. It treats emotional and economic behaviour as temporally entangled, not causally linked in one direction. The interface is the argument.
+
+The intellectual lineage runs through Keynes on animal spirits, Shiller on narrative economics, and the tradition of data-driven affective mapping in media art and critical design. A research paper formalising the three-axis framework is in preparation.
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  animal-spirits (this repo)              │
-│                                                          │
-│  index.html — a single self-contained HTML file:        │
-│    - D3 + Canvas rendering                              │
-│    - EMA smoothing, derivatives, instability detection  │
-│    - Latent field Ψ via radial basis functions          │
-│    - Lean / Caution / Pause posture derivation          │
-│                                                          │
-│  Polls every 5 minutes, flashes the freshness           │
-│  indicator only when a new sample timestamp arrives.    │
-│                        ↓                                 │
-└─────────────────────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│       animal-spirits-api (sibling repo)                  │
-│                                                          │
-│  GitHub Actions cron, every 15 minutes:                 │
-│    - Fetch attention   (Wikimedia Pageviews)            │
-│    - Fetch market      (Alpha Vantage ETFs + FRED)      │
-│    - Fetch narrative   (GDELT DOC 2.0 TimelineTone)     │
-│    - Compose unified state, commit data/state.json      │
-│                                                          │
-│  Published at:                                          │
-│  super-futures.github.io/animal-spirits-api/            │
-│      data/state.json                                    │
-└─────────────────────────────────────────────────────────┘
-```
+This repo is the frontend — a single `index.html`, D3 + Canvas, polling the static `state.json` feed every 5 minutes. No build step. No framework.
 
-The [backend](https://github.com/super-futures/animal-spirits-api) is a scheduled job, not a server — no cold starts, no billing risk, no CORS dance. The frontend reads a single static JSON file and does all the interpretive work locally.
+The backend ([animal-spirits-api](https://github.com/super-futures/animal-spirits-api)) is a scheduled GitHub Actions job that composes state every 15 minutes by pulling from Wikimedia, Alpha Vantage, FRED, and GDELT, and commits the result to `data/state.json`. No server. The commit history of `state.json` is a growing time-series dataset.
 
-## The three axes
-
-| Axis | Source | What it reads |
-|------|--------|---------------|
-| **Attention** | Wikimedia Pageviews | Which economic-anxiety / confidence / aspiration / constraint terms people are looking up today, relative to their 30-day baseline |
-| **Market** | Alpha Vantage (ETFs) + FRED | Regional equity momentum (SPY, ISF.LON, NIFTYBEES.BSE) blended with a global macro-stress backdrop (VIX, high-yield credit spread, dollar anomaly) |
-| **Narrative** | GDELT DOC 2.0 | Average tone of news coverage matching anxiety keywords, per region, over the last 24 hours |
-
-Each axis is normalised per region against its own rolling baseline and returns a signed scalar in approximately `[−1, +1]`. Negative = stress/contraction-coded. Positive = expansion-coded. Zero = neutral or no signal.
-
-## Field dynamics
-
-The frontend layers three further derivations on top of the unified state:
-
-- **EMA smoothing** — each axis is smoothed with `α = 0.25` to damp per-tick noise without hiding genuine inflections
-- **Latent field Ψ** — a weighted combination of the three axes projected spatially via radial basis functions
-- **Regime probability decomposition** — expansion (*bull*), contraction (*bear*), instability (*stag*) are emergent probabilities derived from Ψ and its tension, not discrete thresholds
-- **Lean / Caution / Pause posture** — collapses the probability decomposition into a plain-language stance toward action
-
-The bull/bear/stag terminology is preserved as a technical subtitle because the literature uses it. The primary vocabulary throughout the UI is *expansion / contraction / instability* and, for posture, *Lean / Caution / Pause*.
-
-## Freshness semantics
-
-The small green dot next to the timestamp in the header has meaningful behaviour:
-
-- **Dim** — the current sample is the same one we already saw
-- **Bright flash** — a new state.json commit has been detected on the backend
-
-The header text `field sampled · HH:MM UTC` shows the UTC timestamp of the backend commit, not the time of the browser poll. The page polls every 5 minutes, the backend refreshes every 15 minutes, so roughly one in three polls produces a new sample.
-
-## Running locally
-
-This is a single HTML file with no build step. To preview:
+## Run locally
 
 ```bash
+git clone https://github.com/super-futures/animal-spirits.git
+cd animal-spirits
 python3 -m http.server 8000
 ```
 
-Then open `http://localhost:8000`.
+Open `http://localhost:8000`. The page will read from the live backend feed.
 
-You can also open `index.html` directly in a browser, but some browsers block `fetch` from `file://` URLs, so serving via a local HTTP server is more reliable.
+## Status
 
-## Deployment
-
-- **GitHub Pages**: Settings → Pages → Deploy from a branch → `main` / root
-- **Netlify**: connect the repo, no build command needed
-
-## Attribution
-
-- Keynes, J. M. (1936). *The General Theory of Employment, Interest and Money.* Chapter 12 — source of the "animal spirits" framing.
-- Leetaru, K. — [GDELT Project](https://www.gdeltproject.org/), whose public computational-narrative infrastructure makes the narrative axis possible.
-- Wikimedia Foundation — Pageviews API.
-- Alpha Vantage, FRED (St. Louis Fed) — market and macro-stress data.
-
-## Versions
-
-- **v1.0** (current) — unified state feed, Expansion/Contraction/Instability primary vocabulary, freshness indicator tied to real backend commits, Ψ-contour labelled in legend, honest axis-key grammar.
-- v0.1 – v0.8 — prototype lineage, archived at [animalspirits-legacy](https://github.com/super-futures/animalspirits-legacy).
+**v1.1** — three axes, three regions, continuous regime. The narrative axis is currently wired for the anxiety cluster; the other three clusters (confidence, aspiration, constraint) are defined in code but not yet live. Attention uses a static 30-day baseline — rolling baseline is a near-term upgrade.
 
 ## Maintainer
 
