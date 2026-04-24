@@ -20,83 +20,74 @@
 html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
 .page{max-width:1100px;margin:0 auto;padding:0.75rem 0.875rem 1.5rem}
 .hdr{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:8px;border-bottom:0.5px solid var(--border)}
-.title{font-size:clamp(15px,3.5vw,22px);font-weight:500;letter-spacing:-0.02em;line-height:1.1}
-.sub{font-size:clamp(8px,1.8vw,10px);color:var(--text2);margin-top:2px}
+.title{font-size:clamp(16px,3.5vw,24px);font-weight:500;letter-spacing:-0.02em;line-height:1.1}
+.sub{font-size:clamp(9px,1.8vw,11px);color:var(--text2);margin-top:2px}
 .ctrls{display:flex;gap:5px;padding:7px 0;border-bottom:0.5px solid var(--border);align-items:center;flex-wrap:wrap}
-.cb{font-size:clamp(8px,2vw,10px);padding:3px 8px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all 0.15s}
+.cb{font-size:clamp(9px,2vw,11px);padding:3px 8px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all 0.15s}
 .cb.active{background:var(--surface2)}
-.th-btn{font-size:8px;padding:2px 7px;border-radius:4px;border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--font);transition:all 0.15s}
-.th-btn.active{background:var(--surface2);color:var(--text2);border-color:var(--border2)}
-.unc-btn{font-size:8px;padding:2px 7px;border-radius:4px;border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--font);transition:all 0.15s}
-.unc-btn.active{background:var(--surface2);color:var(--text2);border-color:var(--border2)}
-.fk{display:flex;align-items:center;gap:7px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
-.fki{display:flex;align-items:center;gap:3px;font-size:8px;color:var(--text3)}
 .map-wrap{position:relative;width:100%;border-radius:10px;overflow:hidden;background:var(--surface2);margin:6px 0;transition:all 0.4s}
 #as-map{width:100%;display:block;transition:all 0.4s}
 #ov{position:absolute;top:0;left:0;pointer-events:none}
-.lbox{position:absolute;bottom:8px;left:8px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:7px 9px;transition:opacity 0.3s}
-.sbox{position:absolute;top:8px;right:8px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:7px 9px;transition:opacity 0.3s}
-.ibox{position:absolute;bottom:8px;right:8px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:7px 9px;transition:opacity 0.3s;max-width:190px}
-.ibox .ih{font-size:9px;font-weight:500;color:var(--text);margin-bottom:3px;line-height:1.3}
-.ibox .ipct{font-size:8px;color:var(--text3);margin-bottom:5px}
-.ibox .iln{font-size:7px;color:var(--text2);line-height:1.4;margin-bottom:2px}
-@media(max-width:440px){.lbox,.sbox,.ibox{display:none}}
+.axis-key-strip{display:flex;flex-wrap:wrap;gap:10px 16px;padding:7px 10px;margin:6px 0;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;align-items:center}
+.akg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);line-height:1.3}
+@media(max-width:500px){.akg{font-size:9px}}
 .bt{font-size:7px;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px}
 .lr{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .ll{font-size:7px;color:var(--text2);line-height:1.3}
 .panels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
 @media(max-width:500px){.panels{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:9px 11px;cursor:pointer;transition:all 0.25s;position:relative}
+.panel{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all 0.25s;position:relative}
 .panel:hover{border-color:var(--border2)}
 .panel.sel{border-width:1.5px;box-shadow:0 2px 12px rgba(0,0,0,0.07)}
 .panel.alert-panel{border-color:#C9404055}
 .panel.dimmed{opacity:0.45}
-.dominant-headline{font-size:10px;font-weight:500;color:var(--text);margin-bottom:3px;line-height:1.3;min-height:14px}
-.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:1px;gap:4px}
-.pn{font-size:9px;color:var(--text3)}
-.bdg{font-size:7px;font-weight:500;padding:1px 5px;border-radius:10px;border:0.5px solid;white-space:nowrap;flex-shrink:0}
-.psrc{font-size:7px;color:var(--text3);margin-bottom:6px}
-.pnote{font-size:7px;color:var(--text2);background:var(--warn);padding:2px 5px;border-radius:3px;display:inline-block;margin-bottom:5px}
+.posture-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.posture-word{font-size:14px;font-weight:500;letter-spacing:-0.01em;line-height:1.1}
+.posture-desc{font-size:10px;color:var(--text2);line-height:1.3}
+.dominant-headline{font-size:11px;color:var(--text2);margin-bottom:4px;line-height:1.3;min-height:14px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;gap:4px}
+.pn{font-size:10px;color:var(--text3)}
+.bdg{font-size:8px;font-weight:500;padding:1px 6px;border-radius:10px;border:0.5px solid;white-space:nowrap;flex-shrink:0;color:var(--text3)}
+.psrc{font-size:8px;color:var(--text3);margin-bottom:6px}
+.pnote{font-size:8px;color:var(--text2);background:var(--warn);padding:2px 5px;border-radius:3px;display:inline-block;margin-bottom:5px}
 .sparklines-wrap{margin-bottom:6px;display:flex;flex-direction:column;gap:2px}
 .spark-row{display:flex;align-items:center;gap:5px}
-.spark-lbl{font-size:7px;color:var(--text3);width:14px;flex-shrink:0}
+.spark-lbl{font-size:8px;color:var(--text3);width:14px;flex-shrink:0}
 .spark-canvas{flex:1;height:16px;display:block}
-.spark-val{font-size:7px;width:18px;text-align:right;flex-shrink:0}
+.spark-val{font-size:8px;width:18px;text-align:right;flex-shrink:0}
 .trow3{display:flex;gap:5px;margin-bottom:5px}
 .tcol{flex:1;min-width:0}
-.thead{font-size:7px;font-weight:500;margin-bottom:3px}
+.thead{font-size:8px;font-weight:500;margin-bottom:3px}
 .bw{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:2px}
 .bf{height:100%;border-radius:2px;transition:width 0.6s ease}
-.bv{font-size:7px;color:var(--text3)}
-.esec{margin-top:6px;padding-top:5px;border-top:0.5px solid var(--border)}
-.eh{font-size:7px;color:var(--text3);margin-bottom:3px}
+.bv{font-size:8px;color:var(--text3)}
+.esec{margin-top:5px;padding-top:4px;border-top:0.5px solid var(--border)}
+.eh{font-size:8px;color:var(--text3);margin-bottom:3px}
 .lagrow{display:flex;align-items:center;gap:4px;margin-bottom:3px}
 .lagtrack{flex:1;height:5px;background:var(--surface2);border-radius:3px;position:relative}
-.edesc{font-size:7px;font-style:italic;margin-bottom:2px}
-.nsec{margin-top:5px;padding-top:5px;border-top:0.5px solid var(--border)}
-.nh{font-size:7px;color:var(--text3);margin-bottom:3px}
+.edesc{font-size:8px;font-style:italic;margin-bottom:2px}
+.nsec{margin-top:5px;padding-top:4px;border-top:0.5px solid var(--border)}
+.nh{font-size:8px;color:var(--text3);margin-bottom:3px}
 .nrow{display:flex;align-items:center;gap:4px;margin-bottom:2px}
-.nvlbl{font-size:7px;color:var(--text3);width:44px;text-align:right;flex-shrink:0}
+.nvlbl{font-size:8px;color:var(--text3);width:44px;text-align:right;flex-shrink:0}
 .nvtrack{flex:1;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
 .nvfill{height:100%;border-radius:2px}
-.nvnum{font-size:7px;width:40px;text-align:right;flex-shrink:0}
-.themes-sec{margin-top:5px;padding-top:5px;border-top:0.5px solid var(--border)}
-.themes-head{font-size:7px;color:var(--text3);margin-bottom:4px}
+.nvnum{font-size:8px;width:40px;text-align:right;flex-shrink:0}
+.themes-sec{margin-top:5px;padding-top:4px;border-top:0.5px solid var(--border)}
+.themes-head{font-size:8px;color:var(--text3);margin-bottom:4px}
 .theme-row{display:flex;align-items:center;gap:5px;margin-bottom:3px}
-.theme-arrow{font-size:9px;width:10px;flex-shrink:0;text-align:center}
+.theme-arrow{font-size:10px;width:10px;flex-shrink:0;text-align:center}
 .theme-vol{height:2px;border-radius:1px;margin-top:2px}
-.signal-row{display:flex;align-items:center;gap:4px;margin-top:5px;padding:3px 6px;border-radius:4px;background:#C9404012;border:0.5px solid #C9404040}
-.signal-text{font-size:7px;color:#C94040;font-weight:500}
-.trows{margin-top:4px}
-.tr{display:flex;align-items:center;gap:4px;margin-bottom:2px}
-.tl{font-size:7px;color:var(--text3);width:62px;text-align:right;flex-shrink:0}
+.trows{margin-top:3px}
+.tr{display:flex;align-items:center;gap:4px;margin-bottom:1px}
+.tl{font-size:8px;color:var(--text3);width:62px;text-align:right;flex-shrink:0}
 .tt{flex:1;height:2px;background:var(--surface2);border-radius:1px;overflow:hidden}
 .tf{height:100%;border-radius:1px}
-.tn{font-size:7px;color:var(--text3);width:16px;text-align:right;flex-shrink:0}
+.tn{font-size:8px;color:var(--text3);width:18px;text-align:right;flex-shrink:0}
 .sigrow{display:flex;align-items:center;gap:3px;margin-top:5px}
 .footer{display:flex;justify-content:space-between;align-items:flex-start;margin-top:8px;padding-top:7px;border-top:0.5px solid var(--border);gap:12px;flex-wrap:wrap}
-.fn{font-size:7px;color:var(--text3);line-height:1.6;max-width:600px}
-.fm{font-size:7px;color:var(--text3);text-align:right;line-height:1.6;white-space:nowrap}
+.fn{font-size:8px;color:var(--text3);line-height:1.6;max-width:600px}
+.fm{font-size:8px;color:var(--text3);text-align:right;line-height:1.6;white-space:nowrap}
 
 @keyframes livePulse{
   0%,100%{opacity:0.3}
@@ -111,83 +102,50 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 <div class="hdr">
   <div>
     <div class="title">Animal Spirits</div>
-    <div class="sub">A real-time interface for reading collective behaviour</div>
+    <div class="sub">Tracing collective economic dynamics — attention, market, narrative</div>
   </div>
   <div style="text-align:right;flex-shrink:0">
     <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-bottom:2px">
-      <div id="pdot" style="width:5px;height:5px;border-radius:50%;background:#4A8C5C;opacity:0.35;transition:opacity 1.8s ease"></div>
-      <span style="font-size:8px;color:var(--text3)" id="horizon-label">field sampled · loading</span>
+      <div id="pdot" style="width:5px;height:5px;border-radius:50%;background:#4A8C5C"></div>
+      <span style="font-size:9px;color:var(--text3)">live</span>
     </div>
-    <div id="tdisp" style="font-size:8px;color:var(--text3)"></div>
+    <div id="tdisp" style="font-size:9px;color:var(--text3)"></div>
   </div>
 </div>
 
-<div id="global-headline" style="font-size:11px;color:var(--text2);margin-top:4px;"></div>
+<div id="global-headline" style="font-size:12px;color:var(--text2);margin-top:4px;"></div>
 
 <div class="ctrls">
-  <span style="font-size:8px;color:var(--text3);white-space:nowrap">regime</span>
-  <div style="display:flex;align-items:center;gap:6px;flex:1;max-width:280px;min-width:140px">
-    <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1">
-      <span style="font-size:8px;color:#2D9C5C;font-weight:500">Expansion</span>
-      <span style="font-size:7px;color:var(--text3);opacity:0.7">bull</span>
-    </div>
+  <span style="font-size:9px;color:var(--text3);white-space:nowrap">global tilt</span>
+  <div style="display:flex;align-items:center;gap:6px;flex:1;max-width:320px;min-width:160px">
+    <span style="font-size:9px;color:#2D9C5C;font-weight:500">Expansion</span>
     <div style="flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,#2D9C5F 0%,#B5883A 50%,#C94040 100%);position:relative;overflow:visible">
       <div id="regime-cursor" style="position:absolute;top:-2px;left:50%;width:3px;height:10px;background:var(--text);border-radius:1px;transition:left 0.6s ease;transform:translateX(-50%)"></div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1">
-      <span style="font-size:8px;color:#C94040;font-weight:500">Contraction</span>
-      <span style="font-size:7px;color:var(--text3);opacity:0.7">bear</span>
-    </div>
-  </div>
-  <button class="unc-btn" id="unc-btn">uncertainty</button>
-  <div class="fk">
-    <div class="fki"><div style="width:7px;height:7px;border-radius:50%;background:#E8A030;opacity:0.85"></div>attention axis</div>
-    <div class="fki"><div style="width:7px;height:7px;border-radius:2px;background:#4A7FB5;opacity:0.85"></div>market axis</div>
-    <div class="fki"><div style="width:7px;height:7px;border-radius:1px;background:#A855C8;opacity:0.85;transform:rotate(45deg)"></div>narrative axis</div>
+    <span style="font-size:9px;color:#C94040;font-weight:500">Contraction</span>
   </div>
 </div>
 
 <div class="map-wrap" id="map-wrap">
-  <svg id="as-map" viewBox="0 0 960 480" style="width:100%;display:block"></svg>
+  <svg id="as-map" viewBox="0 60 960 380" style="width:100%;display:block"></svg>
   <canvas id="ov"></canvas>
-  <div class="lbox" id="lbox">
-    <div class="bt">axis key</div>
-    <div class="lr"><svg width="26" height="12" style="flex-shrink:0"><circle cx="8" cy="6" r="7" fill="#E8A030" opacity="0.18"/><circle cx="8" cy="6" r="3.5" fill="#E8A030" opacity="0.8"/></svg><div class="ll">attention — size = volume, diffusion = uncertainty</div></div>
-    <div class="lr"><svg width="26" height="12" style="flex-shrink:0"><rect x="1" y="2" width="14" height="8" rx="2" fill="#4A7FB5" opacity="0.18"/><rect x="4" y="4" width="8" height="4" rx="1" fill="#4A7FB5" opacity="0.8"/></svg><div class="ll">market — position = regime, size = conviction</div></div>
-    <div class="lr"><svg width="26" height="12" style="flex-shrink:0"><line x1="4" y1="9" x2="18" y2="4" stroke="#A855C8" stroke-width="1.2" opacity="0.8"/><polygon points="18,2 22,6 15,6" fill="#A855C8" opacity="0.8"/></svg><div class="ll">narrative — direction = tone, length = volume</div></div>
-    <div style="margin-top:5px;padding-top:4px;border-top:0.5px solid var(--border)">
-      <div class="lr"><svg width="26" height="12" style="flex-shrink:0"><circle cx="6" cy="6" r="4" fill="#E8A030" opacity="0.45"/><rect x="14" y="3" width="8" height="6" rx="1" fill="#4A7FB5" opacity="0.45"/><line x1="10" y1="6" x2="14" y2="6" stroke="#888" stroke-width="0.8" stroke-dasharray="1.5 1"/></svg><div class="ll">A↔M offset = temporal lag</div></div>
-      <div class="lr"><svg width="26" height="12" style="flex-shrink:0"><path d="M 2 9 Q 8 3, 14 6 T 24 5" stroke="#888" stroke-width="0.7" fill="none" opacity="0.7" stroke-dasharray="1.5 1.2"/></svg><div class="ll">Ψ contour = expansion / contraction boundary</div></div>
-      <div class="lr"><svg width="26" height="12" style="flex-shrink:0"><circle cx="6" cy="7" r="4" fill="#C94040" opacity="0.5"/><circle cx="6" cy="7" r="7" fill="none" stroke="#C94040" stroke-width="0.8" opacity="0.4"/></svg><div class="ll">ring = signal emerging</div></div>
-    </div>
-  </div>
-  <div class="sbox" id="sbox">
-    <div class="bt">entanglement states</div>
-    <div class="lr"><div style="width:6px;height:6px;border-radius:50%;background:#4A8C5C;flex-shrink:0"></div><div class="ll">leading — affect leading</div></div>
-    <div class="lr"><div style="width:6px;height:6px;border-radius:50%;background:#4A7FB5;flex-shrink:0"></div><div class="ll">concurrent — co-moving</div></div>
-    <div class="lr"><div style="width:6px;height:6px;border-radius:50%;background:#7B5EA7;flex-shrink:0"></div><div class="ll">lagging — market leading</div></div>
-    <div class="lr"><div style="width:6px;height:6px;border-radius:50%;background:#C94040;flex-shrink:0"></div><div class="ll">divergent — high tension</div></div>
-    <div class="lr"><div style="width:6px;height:6px;border-radius:50%;background:#B5883A;flex-shrink:0"></div><div class="ll">amplifying — reinforcing alignment</div></div>
-    <div style="margin-top:5px;padding-top:4px;border-top:0.5px solid var(--border)">
-      <div class="bt" style="margin-bottom:4px">narrative state</div>
-      <div class="lr"><div style="width:6px;height:6px;background:#A855C8;transform:rotate(45deg);flex-shrink:0"></div><div class="ll">accelerating — contagion risk</div></div>
-      <div class="lr"><div style="width:6px;height:6px;background:#888;transform:rotate(45deg);flex-shrink:0"></div><div class="ll">stable — story steady</div></div>
-      <div class="lr"><div style="width:6px;height:6px;background:#4A8C5C;transform:rotate(45deg);flex-shrink:0"></div><div class="ll">decelerating — fading</div></div>
-    </div>
-  </div>
-  <div class="ibox" id="ibox" style="display:none">
-    <div class="bt">posture</div>
-    <div class="ih" id="ibox-head"></div>
-    <div class="ipct" id="ibox-pct"></div>
-    <div id="ibox-lines"></div>
-  </div>
+  <!-- sbox (entanglement states) and ibox (posture popout) removed in v1.1 -->
+</div>
+
+<div class="axis-key-strip">
+  <div class="akg"><svg width="26" height="12" style="flex-shrink:0"><circle cx="8" cy="6" r="7" fill="#E8A030" opacity="0.18"/><circle cx="8" cy="6" r="3.5" fill="#E8A030" opacity="0.8"/></svg><span>attention — warm · diffuse</span></div>
+  <div class="akg"><svg width="26" height="12" style="flex-shrink:0"><rect x="1" y="2" width="14" height="8" rx="2" fill="#4A7FB5" opacity="0.18"/><rect x="4" y="4" width="8" height="4" rx="1" fill="#4A7FB5" opacity="0.8"/></svg><span>market — cool · defined</span></div>
+  <div class="akg"><svg width="26" height="12" style="flex-shrink:0"><line x1="4" y1="9" x2="18" y2="4" stroke="#A855C8" stroke-width="1.2" opacity="0.8"/><polygon points="18,2 22,6 15,6" fill="#A855C8" opacity="0.8"/></svg><span>narrative — direction = tone · length = volume</span></div>
+  <div class="akg"><svg width="26" height="12" style="flex-shrink:0"><circle cx="6" cy="6" r="4" fill="#E8A030" opacity="0.45"/><rect x="14" y="3" width="8" height="6" rx="1" fill="#4A7FB5" opacity="0.45"/><line x1="10" y1="6" x2="14" y2="6" stroke="#888" stroke-width="0.8" stroke-dasharray="1.5 1"/></svg><span>A↔M offset = temporal lag</span></div>
+  <div class="akg"><svg width="26" height="12" style="flex-shrink:0"><circle cx="13" cy="6" r="6" fill="none" stroke="#888" stroke-width="0.5" stroke-dasharray="1.5 1.5" opacity="0.5"/><circle cx="13" cy="6" r="3" fill="none" stroke="#888" stroke-width="0.9" opacity="0.8"/></svg><span>Ψ contour = expansion / contraction boundary</span></div>
+  <div class="akg"><svg width="26" height="12" style="flex-shrink:0"><circle cx="6" cy="7" r="4" fill="#C94040" opacity="0.5"/><circle cx="6" cy="7" r="7" fill="none" stroke="#C94040" stroke-width="0.8" opacity="0.4"/></svg><span>ring = signal emerging</span></div>
 </div>
 
 <div class="panels" id="panels"></div>
 
 <div class="footer">
   <div class="fn" id="footer-text"></div>
-  <div class="fm"><span id="api-badge" style="cursor:pointer">M○ S○ N○</span><br>v1.0 · 3 axes · 3 regions · continuous regime<br>Expansion · Contraction · Instability</div>
+  <div class="fm"><span id="api-badge" style="cursor:pointer">simulated data</span><br>v1.1 prototype · 3 axes · 3 regions · continuous regime<br>Expansion · Contraction · Instability</div>
 </div>
 </div>
 
@@ -210,15 +168,15 @@ const A_COLOR    = '#E8A030';
 const M_COLOR    = '#4A7FB5';
 const N_COLOR    = '#A855C8';
 
-let timeHorizon = '24h';
-let showUncertainty = false;
 let focusRegion = null;
-const TH_MULT = {'24h':1.0,'7d':0.6,'30d':0.35};
+let pulse = true;
+// Simulation noise scale — previously toggled by UI horizon buttons
+const SIM_NOISE_SCALE = 1.0;
 
 const isDark = matchMedia('(prefers-color-scheme:dark)').matches;
 const proj = d3.geoMercator()
-  .scale(140)
-  .translate([480,240]);
+  .scale(165)
+  .translate([480,280]);
 const mapSvg = d3.select('#as-map');
 
 const HIST_LEN = 28;
@@ -403,7 +361,7 @@ function initSystem(){
 
 function generateSyntheticRaw(regionId,warmup=false){
   const st = synthState[regionId];
-  const tm = TH_MULT[timeHorizon];
+  const tm = SIM_NOISE_SCALE;
   if(Math.random()<0.02) st.target = (Math.random()-0.5)*1.6;
   st.latent += 0.025*(st.target-st.latent)*tm + 0.12*randn()*Math.sqrt(tm);
   st.latent = Math.max(-1.8,Math.min(1.8,st.latent));
@@ -519,10 +477,10 @@ function getPosture(st){
 
   const alignment_low = Math.abs(sig.a_norm - sig.m_norm) > 0.5;
 
-  let posture;
-  if (dyn.p_stag > 0.6) posture = "Pause";
-  else if (alignment_low) posture = "Caution";
-  else posture = "Lean";
+  let posture, color;
+  if (dyn.p_stag > 0.6) { posture = "Pause"; color = STAG_COLOR; }
+  else if (alignment_low) { posture = "Caution"; color = STAG_COLOR; }
+  else { posture = "Lean"; color = dyn.p_bull > dyn.p_bear ? BULL_COLOR : BEAR_COLOR; }
 
   let alignment = alignment_low
     ? "Signals are out of sync"
@@ -535,6 +493,7 @@ function getPosture(st){
 
   return {
     posture,
+    color,
     alignment,
     lag
   };
@@ -790,7 +749,7 @@ function draw(){
       g1.addColorStop(0,aColor+'aa');g1.addColorStop(0.25,aColor+'55');g1.addColorStop(0.6,aColor+'18');g1.addColorStop(1,aColor+'00');
       ctx.beginPath();ctx.arc(apx,apy,aO,0,Math.PI*2);ctx.fillStyle=g1;ctx.fill();
 
-      if(visInstability>0.35||showUncertainty){
+      if(visInstability>0.35){
         ctx.beginPath();ctx.arc(apx,apy,aO*0.75,0,Math.PI*2);
         ctx.setLineDash([2,3]);
         ctx.strokeStyle=STAG_COLOR+Math.round(visInstability*120).toString(16).padStart(2,'0');
@@ -891,22 +850,12 @@ function draw(){
     const aR=11+st.sig.a*18,mR=8+st.sig.m*15;
     const tc=isDark?'rgba(255,255,255,0.88)':'rgba(15,15,15,0.82)';
     const ly=py+Math.max(aR,mR)+st.sig.n*22+18;
-    ctx.font='500 10px -apple-system,sans-serif';ctx.textAlign='center';
+    ctx.font='500 11px -apple-system,sans-serif';ctx.textAlign='center';
     ctx.fillStyle=tc;ctx.fillText(rg.short,px,ly);
-    ctx.font='400 8px -apple-system,sans-serif';
-    ctx.fillStyle=dyn.color+'cc';ctx.fillText(dyn.label,px,ly+11);
-    if(dyn.p_stag>0.5){ctx.fillStyle=STAG_COLOR+'cc';ctx.fillText('instability',px,ly+21);}
+    ctx.font='400 9px -apple-system,sans-serif';
+    ctx.fillStyle=dyn.color+'cc';ctx.fillText(dyn.label,px,ly+12);
     ctx.globalAlpha=1;
   });
-}
-
-function getSignalText(dyn){
-  if(dyn.p_stag>0.5) return{text:'transition state — high instability',color:STAG_COLOR};
-  if(dyn.p_bull>0.8) return{text:'strong expansion — bull dominant',color:BULL_COLOR};
-  if(dyn.p_bear>0.8) return{text:'strong contraction — bear dominant',color:BEAR_COLOR};
-  if(dyn.p_bull>0.6) return{text:'expansion regime',color:BULL_COLOR};
-  if(dyn.p_bear>0.6) return{text:'contraction regime',color:BEAR_COLOR};
-  return{text:'mixed regime — monitoring',color:'#888888'};
 }
 
 function panels(){
@@ -916,6 +865,7 @@ function panels(){
 
   REGIONS.forEach((rg,ri)=>{
     const st=states[ri],sig=st.sig,dyn=st.dyn;
+    const post=getPosture(st);
     const isFocused=!focusRegion||focusRegion===rg.id;
     const p=document.createElement('div');
     p.className='panel'+(focusRegion===rg.id?' sel':'')+(dyn.p_stag>0.55?' alert-panel':'')+(isFocused?'':' dimmed');
@@ -924,19 +874,23 @@ function panels(){
     const lag=sig.a_norm-sig.m_norm;
     const lagLbl=lag>0.2?`A +${(lag*5).toFixed(1)} ahead`:lag<-0.2?`M ${Math.abs(lag*5).toFixed(1)} ahead`:'co-incident';
     const lagPct=50+lag*40;
-    const signal=getSignalText(dyn);
     const dashLen=(dyn.H/Math.log(2))*75;
 
-    let h=`<div class="dominant-headline">${dyn.label} — ${dyn.regime}</div>`;
+    // Posture row — primary interpretive vocabulary
+    let h=`<div class="posture-row">
+      <span class="posture-word" style="color:${post.color}">${post.posture}</span>
+      <span class="posture-desc">— ${post.alignment.toLowerCase()}</span>
+    </div>`;
+
+    // Region + regime (expansion/contraction/instability primary, bull/bear/stag secondary)
     h+=`<div class="ph">
       <div style="display:flex;align-items:center;gap:5px">
         <div style="width:5px;height:5px;border-radius:50%;background:${dyn.color};flex-shrink:0"></div>
-        <div class="pn">${rg.label}</div>
+        <div class="pn">${rg.label} · <span style="color:${dyn.color}">${dyn.label}</span> <span style="opacity:0.4">(${dyn.regime})</span></div>
       </div>
       <div style="position:relative;display:inline-flex;align-items:center;justify-content:center">
-        <div class="bdg" style="color:${dyn.color};border-color:${dyn.color}40">${dyn.regime}</div>
-        <svg width="28" height="28" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">
-          <circle cx="14" cy="14" r="12" fill="none" stroke="${dyn.color}" stroke-width="1" stroke-dasharray="${dashLen} 75" opacity="0.5"/>
+        <svg width="22" height="22">
+          <circle cx="11" cy="11" r="9" fill="none" stroke="${dyn.color}" stroke-width="1" stroke-dasharray="${dashLen*0.75} 56" opacity="0.45"/>
         </svg>
       </div>
     </div>`;
@@ -946,41 +900,37 @@ function panels(){
     </div>`;
 
     h+=`<div class="trow3">
-      <div class="tcol"><div class="thead" style="color:${BULL_COLOR}">P(bull)</div><div class="bw"><div class="bf" style="width:${Math.round(dyn.p_bull*100)}%;background:${BULL_COLOR}"></div></div><div class="bv">${Math.round(dyn.p_bull*100)}%</div></div>
-      <div class="tcol"><div class="thead" style="color:${BEAR_COLOR}">P(bear)</div><div class="bw"><div class="bf" style="width:${Math.round(dyn.p_bear*100)}%;background:${BEAR_COLOR}"></div></div><div class="bv">${Math.round(dyn.p_bear*100)}%</div></div>
-      <div class="tcol"><div class="thead" style="color:${STAG_COLOR}">P(stag)</div><div class="bw"><div class="bf" style="width:${Math.round(dyn.p_stag*100)}%;background:${STAG_COLOR}"></div></div><div class="bv">${Math.round(dyn.p_stag*100)}%</div></div>
+      <div class="tcol"><div class="thead" style="color:${BULL_COLOR}">P(exp)</div><div class="bw"><div class="bf" style="width:${Math.round(dyn.p_bull*100)}%;background:${BULL_COLOR}"></div></div><div class="bv">${Math.round(dyn.p_bull*100)}%</div></div>
+      <div class="tcol"><div class="thead" style="color:${BEAR_COLOR}">P(con)</div><div class="bw"><div class="bf" style="width:${Math.round(dyn.p_bear*100)}%;background:${BEAR_COLOR}"></div></div><div class="bv">${Math.round(dyn.p_bear*100)}%</div></div>
+      <div class="tcol"><div class="thead" style="color:${STAG_COLOR}">P(inst)</div><div class="bw"><div class="bf" style="width:${Math.round(dyn.p_stag*100)}%;background:${STAG_COLOR}"></div></div><div class="bv">${Math.round(dyn.p_stag*100)}%</div></div>
     </div>`;
 
     h+=`<div class="esec">
-      <div class="eh">latent field & tension</div>
+      <div class="eh">state geometry</div>
       <div class="trows">
-        <div class="tr"><div class="tl">Ψ</div><div class="tt"><div class="tf" style="width:${Math.min(100,Math.max(0,(dyn.psi+4)/8*100))}%;background:#888"></div></div><div class="tn">${dyn.psi.toFixed(2)}</div></div>
-        <div class="tr"><div class="tl">tension</div><div class="tt"><div class="tf" style="width:${Math.min(100,dyn.tension/4*100)}%;background:${STAG_COLOR}"></div></div><div class="tn">${dyn.tension.toFixed(2)}</div></div>
-        <div class="tr"><div class="tl">entropy</div><div class="tt"><div class="tf" style="width:${Math.min(100,dyn.H/Math.log(2)*100)}%;background:#7B5EA7"></div></div><div class="tn">${dyn.H.toFixed(2)}</div></div>
+        <div class="tr"><div class="tl">Ψ</div><div class="tt"><div class="tf" style="width:${Math.min(100,Math.max(0,(dyn.psi+4)/8*100))}%;background:#888"></div></div><div class="tn">${dyn.psi.toFixed(1)}</div></div>
+        <div class="tr"><div class="tl">tension</div><div class="tt"><div class="tf" style="width:${Math.min(100,dyn.tension/4*100)}%;background:${STAG_COLOR}"></div></div><div class="tn">${dyn.tension.toFixed(1)}</div></div>
+        <div class="tr"><div class="tl">entropy</div><div class="tt"><div class="tf" style="width:${Math.min(100,dyn.H/Math.log(2)*100)}%;background:#7B5EA7"></div></div><div class="tn">${dyn.H.toFixed(1)}</div></div>
       </div>
     </div>`;
 
     h+=`<div class="esec">
-      <div class="eh">A ↔ M temporal relationship</div>
+      <div class="eh">A ↔ M lag</div>
       <div class="lagrow">
-        <span style="font-size:8px;color:${A_COLOR}">A</span>
+        <span style="font-size:9px;color:${A_COLOR}">A</span>
         <div class="lagtrack">
           <div style="position:absolute;top:50%;transform:translateY(-50%) translateX(-50%);left:${Math.round(Math.min(95,Math.max(5,lagPct)))}%;width:7px;height:7px;border-radius:50%;background:${dyn.color};transition:left 0.5s ease"></div>
           <div style="position:absolute;top:0;left:50%;width:0.5px;height:100%;background:var(--border2)"></div>
         </div>
-        <span style="font-size:8px;color:${M_COLOR}">M</span>
+        <span style="font-size:9px;color:${M_COLOR}">M</span>
       </div>
       <div class="edesc" style="color:${dyn.color}">${lagLbl}</div>
     </div>`;
 
     h+=`<div class="nsec">
       <div class="nh">narrative velocity</div>
-      <div class="nrow"><div class="nvlbl">volume</div><div class="nvtrack"><div class="nvfill" style="width:${Math.round(sig.n*100)}%;background:${N_COLOR}"></div></div><div class="nvnum" style="color:${N_COLOR}">${Math.round(sig.n*100)}</div></div>
+      <div class="nrow"><div class="nvlbl">volume</div><div class="nvtrack"><div class="nvfill" style="width:${Math.round(sig.n*100)}%;background:${N_COLOR}"></div></div><div class="nvnum" style="color:${N_COLOR}">${Math.round(sig.n*100)}%</div></div>
       <div class="nrow"><div class="nvlbl">d/dt</div><div class="nvtrack"><div class="nvfill" style="width:${Math.round(Math.min(100,Math.abs(sig.dn)*200))}%;background:${sig.dn>0?'#C94040':'#4A8C5C'}"></div></div><div class="nvnum" style="color:${sig.dn>0?'#C94040':'#4A8C5C'}">${sig.dn>0?'+':''}${sig.dn.toFixed(2)}</div></div>
-    </div>`;
-
-    h+=`<div class="signal-row" style="background:${signal.color}12;border-color:${signal.color}40">
-      <span class="signal-text" style="color:${signal.color}">${signal.text}</span>
     </div>`;
 
     if(st.hasLive){
@@ -990,22 +940,6 @@ function panels(){
     p.innerHTML=h;
     p.onclick=()=>{
       focusRegion=focusRegion===rg.id?null:rg.id;
-      document.getElementById('lbox').style.opacity=focusRegion?'0.4':'1';
-      document.getElementById('sbox').style.opacity=focusRegion?'0.4':'1';
-      const ibox=document.getElementById('ibox');
-      if(focusRegion){
-        const st=states[ri];
-        const p=getPosture(st);
-        document.getElementById('ibox-head').textContent=rg.label;
-        document.getElementById('ibox-pct').textContent=p.posture;
-        document.getElementById('ibox-lines').innerHTML=`
-          <div class="iln">${p.alignment}</div>
-          <div class="iln">${p.lag}</div>
-        `;
-        ibox.style.display='block';
-      }else{
-        ibox.style.display='none';
-      }
       panels(); draw();
     };
     con.appendChild(p);
@@ -1019,12 +953,6 @@ function panels(){
 // ═══════════════════════════════════════════════════════════════
 // UI & CONTROLS
 // ═══════════════════════════════════════════════════════════════
-document.getElementById('unc-btn').onclick=function(){
-  showUncertainty=!showUncertainty;
-  this.classList.toggle('active',showUncertainty);
-  draw();panels();
-};
-
 function updateTime(){
   const now=new Date();
   document.getElementById('tdisp').textContent=
@@ -1035,7 +963,7 @@ function updateTime(){
 // ═══════════════════════════════════════════════════════════════
 // LIVE DATA
 // ═══════════════════════════════════════════════════════════════
-const STATE_URL = 'https://super-futures.github.io/animal-spirits-api/data/state.json';
+const API_URL = 'https://animalspirits-api.onrender.com';
 window.liveMarkets = null;
 window.liveSentiment = null;
 window.liveNarrative = null;
@@ -1051,117 +979,80 @@ function updateAPIBadge(){
   badge.title=`Market: ${axisStatus.market?'live':'simulated'} · Attention: ${axisStatus.sentiment?'live':'simulated'} · Narrative: ${axisStatus.narrative?'live':'simulated'}`;
 }
 
-// The backend composes a single unified state every 15 min via GitHub Actions
-// and publishes it as a static JSON file served by GitHub Pages. We poll it
-// every few minutes. No CORS dance, no cold start, no proxy.
-//
-// The composed state shape is:
-//   { timestamp, regions: { us|uk|india: { attention, market, narrative } },
-//     meta: { attention, market, narrative: "live" | "simulated" } }
-// Each scalar is in ~[-1, +1]. Negative = stress, Positive = expansion.
+async function fetchWithWake(url,maxWaitMs=90000){
+  try{const r=await fetch(url);if(r.ok)return await r.json();}catch(e){}
+  const start=Date.now();
+  while(Date.now()-start<maxWaitMs){
+    await new Promise(res=>setTimeout(res,12000));
+    try{const r=await fetch(url);if(r.ok)return await r.json();}catch(e){}
+  }
+  return null;
+}
 
-async function fetchState(){
+async function fetchWikiViews(article){
   try{
-    // Cache-bust so we catch the latest commit rather than a stale CDN copy.
-    const res = await fetch(STATE_URL + '?t=' + Date.now(), {cache: 'no-store'});
+    const end=new Date();const start=new Date(end-7*86400000);
+    const fmt=d=>d.toISOString().slice(0,10).replace(/-/g,'');
+    const url=`https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${article}/daily/${fmt(start)}/${fmt(end)}`;
+    const res=await fetch(url,{headers:{'User-Agent':'AnimalSpirits/1.0'}});
+    if(!res.ok) return 0;
+    const d=await res.json();
+    const items=d.items||[];
+    return items.length?items.reduce((a,b)=>a+b.views,0)/items.length:0;
+  }catch(e){return 0;}
+}
+
+async function fetchSentiment(region,cluster){
+  const WIKI_TERMS={
+    anxiety:{us:['Recession','Unemployment','Stock_market_crash'],uk:['Recession','Unemployment','Cost_of_living_crisis'],india:['Recession','Unemployment_in_India','Inflation']},
+    confidence:{us:['Bull_market','Economic_growth','Consumer_confidence'],uk:['Economic_growth','Consumer_confidence','Investment'],india:['Economic_growth','Bull_market','Investment']},
+    aspiration:{us:['Luxury_goods','Travel','Real_estate'],uk:['Luxury_goods','Travel','Property'],india:['Luxury_goods','Tourism','Real_estate']},
+    constraint:{us:['Budget','Debt','Frugality'],uk:['Austerity','Budget','Food_bank'],india:['Budget','Debt','Frugality']},
+  };
+  const terms=(WIKI_TERMS[cluster]||{})[region]||[];
+  if(!terms.length) return null;
+  const views=await Promise.all(terms.map(t=>fetchWikiViews(t)));
+  const total=views.reduce((a,b)=>a+b,0);
+  if(!total) return null;
+  const normalised=Math.min(total/50000,1);
+  return{value:Math.round(normalised*1000)/1000,confidence:0.72,source:'Wikimedia Pageviews',terms,views:views.map(Math.round)};
+}
+
+async function fetchAllSentiment(){
+  const result={};
+  for(const region of ['us','uk','india']){
+    result[region]={};
+    for(const cluster of ['anxiety','confidence','aspiration','constraint']){
+      result[region][cluster]=await fetchSentiment(region,cluster);
+    }
+  }
+  return result;
+}
+
+async function fetchGDELT(cluster){
+  try{
+    const res=await fetch(`${API_URL}/api/gdelt/cluster/${cluster}`);
     if(!res.ok) return null;
     return await res.json();
-  }catch(e){
-    console.warn('State fetch failed:', e);
-    return null;
-  }
-}
-
-// Track the last-seen sample timestamp so we can flash the freshness
-// indicator only when a genuinely new state lands, rather than on every
-// background poll.
-let lastSampleTimestamp = null;
-
-function flashFreshness(){
-  const dot = document.getElementById('pdot');
-  if(!dot) return;
-  dot.style.transition = 'opacity 0.2s ease';
-  dot.style.opacity = '1';
-  setTimeout(()=>{
-    dot.style.transition = 'opacity 1.8s ease';
-    dot.style.opacity = '0.35';
-  }, 400);
-}
-
-function formatSampledLabel(isoTimestamp){
-  if(!isoTimestamp) return 'field sampled · loading';
-  try{
-    const d = new Date(isoTimestamp);
-    const hh = String(d.getUTCHours()).padStart(2,'0');
-    const mm = String(d.getUTCMinutes()).padStart(2,'0');
-    return `field sampled · ${hh}:${mm} UTC`;
-  }catch(e){
-    return 'field sampled · live';
-  }
+  }catch(e){return null;}
 }
 
 async function fetchLiveData(){
-  const state = await fetchState();
-  if(!state || !state.regions || !state.meta){
-    updateAPIBadge();
-    return;
-  }
-
-  // Translate the unified [-1,+1] scalars into the shape the existing
-  // getRegionState() pipeline already expects. The downstream EMA /
-  // derivatives / dynamics / rendering are unchanged.
-  const liveMarkets   = {};
-  const liveSentiment = {};
-  const liveNarrative = {};
-
-  for(const region of ['us','uk','india']){
-    const r = state.regions[region] || {};
-
-    // Market: already a signed scalar in [-1, +1].
-    if(r.market !== null && r.market !== undefined){
-      liveMarkets[region] = {field_value: r.market};
-    }
-
-    // Attention: backend returns [-1, +1] (z-scored cluster composite).
-    // Pipeline expects [0, 1]. Remap: -1 -> 0, 0 -> 0.5, +1 -> 1.
-    if(r.attention !== null && r.attention !== undefined){
-      liveSentiment[region] = {combined: {value: (r.attention + 1) / 2}};
-    }
-
-    // Narrative: pipeline reads tone_normalised directly from [-1, +1].
-    if(r.narrative !== null && r.narrative !== undefined){
-      liveNarrative[region] = {combined: {tone_normalised: r.narrative}};
-    }
-  }
-
-  window.liveMarkets   = Object.keys(liveMarkets).length   ? liveMarkets   : null;
-  window.liveSentiment = Object.keys(liveSentiment).length ? liveSentiment : null;
-  window.liveNarrative = Object.keys(liveNarrative).length ? liveNarrative : null;
-
-  axisStatus.market    = state.meta.market    === 'live';
-  axisStatus.sentiment = state.meta.attention === 'live';
-  axisStatus.narrative = state.meta.narrative === 'live';
-
-  // Freshness: only flash + update label when the timestamp actually changed,
-  // so the pulse signals "a new sample has been composed by the backend"
-  // rather than "we polled again."
-  if(state.timestamp && state.timestamp !== lastSampleTimestamp){
-    lastSampleTimestamp = state.timestamp;
-    flashFreshness();
-    const label = document.getElementById('horizon-label');
-    if(label) label.textContent = formatSampledLabel(state.timestamp);
-  }
-
-  updateAPIBadge();
-  invalidateStateCache();
-  panels();
-  draw();
+  const badge=document.getElementById('api-badge');
+  if(badge){badge.textContent='connecting...';badge.style.color='var(--text3)';}
+  const mkt=await fetchWithWake(API_URL+'/api/market/all',90000);
+  if(mkt&&Object.values(mkt).some(v=>v!==null)){window.liveMarkets=mkt;axisStatus.market=true;updateAPIBadge();}
+  const sent=await fetchAllSentiment();
+  if(sent&&Object.values(sent).some(r=>Object.values(r).some(Boolean))){window.liveSentiment=sent;axisStatus.sentiment=true;}
+  const narr=await fetchGDELT('anxiety');
+  if(narr){window.liveNarrative=narr;axisStatus.narrative=true;}
+  updateAPIBadge();invalidateStateCache();panels();draw();
 }
 
 // ═══════════════════════════════════════════════════════════════
 // INITIALISATION & TICK
 // ═══════════════════════════════════════════════════════════════
-const FOOTER_TEXT='What Keynes called animal spirits — the non-rational drivers of collective action — is rendered here as a measurable field state. Attention, market, and narrative are read as three independent axes of a single affective field and projected into a latent measure Ψ. Each axis is EMA-smoothed and normalised per region against its own rolling baseline. Regime probabilities — expansion, contraction, instability — emerge from field dynamics, not thresholds. This is a mirror, not a predictor.';
+const FOOTER_TEXT='The system tracks three continuous collective states — Expansion, Contraction, and Instability (bull, bear, stag in the Keynesian register). Attention, market, and narrative signals are smoothed via EMA, normalised per region, and projected into a latent field Ψ. P(·) denotes regime probability, emerging from the field dynamics rather than from thresholds. Instability is not a third independent class: it is the tension produced when attention, market, and narrative axes diverge or accelerate.';
 
 document.getElementById('footer-text').textContent=FOOTER_TEXT;
 
@@ -1183,6 +1074,9 @@ function tick(){
 
   updateGlobalHeadline(states);
 
+  pulse=!pulse;
+  document.getElementById('pdot').style.opacity=pulse?'0.9':'0.3';
+
   const meanDN=states.reduce((a,s)=>a+Math.abs(s.sig.dn),0)/states.length;
   const nextInterval=Math.max(800,Math.min(5000,2800/(1+0.3*meanDN)));
 
@@ -1198,10 +1092,8 @@ function tick(){
 
 window.addEventListener('resize',()=>setTimeout(draw,60));
 updateAPIBadge();
-// The feed refreshes every 15 min on the backend. We poll every 5 min to
-// catch new commits reasonably soon without hammering GitHub Pages.
 setTimeout(fetchLiveData,120);
-setInterval(fetchLiveData,5*60*1000);
+setInterval(fetchLiveData,15*60*1000);
 </script>
 </body>
 </html>
