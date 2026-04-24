@@ -110,7 +110,6 @@ You can also open `index.html` directly in a browser, but some browsers block `f
 ## Attribution
 
 - Keynes, J. M. (1936). *The General Theory of Employment, Interest and Money.* Chapter 12 — source of the "animal spirits" framing.
-- Benayoun, M. (2011). *e-Forecast.* Hong Kong — conceptual precursor for real-time collective-mood visualisation.
 - Leetaru, K. — [GDELT Project](https://www.gdeltproject.org/), whose public computational-narrative infrastructure makes the narrative axis possible.
 - Wikimedia Foundation — Pageviews API.
 - Alpha Vantage, FRED (St. Louis Fed) — market and macro-stress data.
