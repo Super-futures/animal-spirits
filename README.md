@@ -185,7 +185,7 @@ Live status indicated by M● S● N● badge. When a source is unavailable the 
 
 - **Frontend:** `animal-spirits.netlify.app` / `super-futures.github.io/animalspirits`
 - **Backend:** `animalspirits-api.onrender.com`
-- **Stack:** Vanilla HTML/JS/D3/Canvas · FastAPI · Render · Netlify
+- **Stack:** Vanilla HTML/JS/D3/Canvas · FastAPI
 
 ---
 
