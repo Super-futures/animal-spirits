@@ -388,11 +388,15 @@ function getRegionState(ri){
   const mkt = window.liveMarkets?.[rg.id];
   if(mkt && mkt.field_value!=null){m_raw = mkt.field_value; hasLive=true;}
 
+  // v1.1: Attention uses RMS across the four affect clusters rather than the mean.
+  // The mean cancels opposing surges (e.g. anxiety + confidence both rising) into a flat
+  // reading. RMS preserves the magnitude of any cluster's activation regardless of which
+  // kinds are active, so internally divergent attention states remain visible to Ψ.
   const sent = window.liveSentiment?.[rg.id];
   if(sent){
-    let sum=0,cnt=0;
-    for(const k in sent){if(sent[k]?.value!=null){sum+=sent[k].value;cnt++;}}
-    if(cnt){a_raw=sum/cnt; hasLive=true;}
+    let sumSq=0,cnt=0;
+    for(const k in sent){if(sent[k]?.value!=null){sumSq+=sent[k].value*sent[k].value;cnt++;}}
+    if(cnt){a_raw=Math.sqrt(sumSq/cnt); hasLive=true;}
   }
 
   const narr = window.liveNarrative?.[rg.id];
