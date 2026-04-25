@@ -164,7 +164,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
     <div class="ak-item"><div class="ak-sq"  style="background:var(--c-M)"></div>market</div>
     <div class="ak-item"><div class="ak-di"  style="background:var(--c-N)"></div>narrative</div>
   </div>
-  <span class="api-status" id="api-badge">M○ S○ N○</span>
+  <span class="api-status" id="api-badge">M○ A○ N○</span>
 </div>
 
 <div class="map-wrap">
@@ -203,7 +203,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 <div class="footer">
   <div class="fn" id="footer-text"></div>
   <div class="fm">
-    <span id="api-badge-footer">M○ S○ N○</span><br>
+    <span id="api-badge-footer">M○ A○ N○</span><br>
     v2.0 · coupling-based dynamics · 3 regions<br>
     expressive × material · attractor regimes<br>
     after DeLanda · Collins · Bakhtin · Keynes
@@ -274,7 +274,7 @@ const isDark = matchMedia('(prefers-color-scheme:dark)').matches;
 window.liveMarkets   = null;
 window.liveSentiment = null;
 window.liveNarrative = null;
-const axisStatus = {market:false, sentiment:false, narrative:false};
+const axisStatus = {market:false, attention:false, narrative:false};
 
 // Returns {A, M, N, hasLive}
 // A ∈ [0,1] (attention RMS across clusters)
@@ -1064,10 +1064,10 @@ const API_URL='https://animalspirits-api.onrender.com';
 
 function updateAPIBadge(){
   const m=axisStatus.market?'M●':'M○';
-  const s=axisStatus.sentiment?'S●':'S○';
+  const s=axisStatus.attention?'A●':'A○';
   const n=axisStatus.narrative?'N●':'N○';
   const html=`<span style="color:${axisStatus.market?C_EXP:'var(--text3)'}">${m}</span> `+
-             `<span style="color:${axisStatus.sentiment?C_A:'var(--text3)'}">${s}</span> `+
+             `<span style="color:${axisStatus.attention?C_A:'var(--text3)'}">${s}</span> `+
              `<span style="color:${axisStatus.narrative?C_N:'var(--text3)'}">${n}</span>`;
   ['api-badge','api-badge-footer'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=html;
@@ -1141,7 +1141,7 @@ async function fetchLiveData(){
   }
   const sent=await fetchAllSentiment();
   if(sent&&Object.values(sent).some(r=>Object.values(r).some(Boolean))){
-    window.liveSentiment=sent; axisStatus.sentiment=true;
+    window.liveSentiment=sent; axisStatus.attention=true;
   }
   const narr=await fetchGDELT('anxiety');
   if(narr){ window.liveNarrative=narr; axisStatus.narrative=true; }
