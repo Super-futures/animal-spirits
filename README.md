@@ -38,7 +38,7 @@ Layer 1 — Signal Acquisition  (raw signal accessors — swappable)
 Layer 2 — Signal Processing   (RegionProcessor — all coupling computation)
 Layer 3 — Synthesis           (state cache, synthetic fallback)
 Layer 4 — Rendering           (map, coupling planes, panels — reads state only)
-Layer 5 — Data Acquisition    (live fetch — Render API, Wikimedia, GDELT)
+Layer 5 — Data Acquisition    (single fetch — /api/state endpoint)
 Layer 6 — Initialisation      (boot, tick, resize)
 ```
 
@@ -50,9 +50,9 @@ Layer 6 — Initialisation      (boot, tick, resize)
 
 ### Three axes
 
-**Attention (A)** — expressive, compositional. Wikimedia pageviews across four affect cluster terms (anxiety, confidence, aspiration, constraint), combined as RMS to preserve magnitude without mean-cancellation. Enters the expressive field as a scalar; compositional structure is displayed in panels but does not yet enter coupling computation. Vectorised A is a v3 direction.
+**Attention (A)** — expressive, compositional. Computed by the backend from Wikimedia pageviews across four affect cluster terms (anxiety, confidence, aspiration, constraint). Enters the expressive field as a scalar; compositional structure is not currently exposed by the backend API. Vectorised A is a v3 direction.
 
-**Narrative (N)** — expressive, dynamic. GDELT tone and volume proxied through the Render backend. Tone captures the valence of propagating expression — stress or relief moving through the media ritual chain; velocity (ΔN) captures activation, the rate at which that expression is propagating. Narrative is not a peer to attention; it is the channel through which affect propagates and deposits.
+**Narrative (N)** — expressive, dynamic. Computed by the backend from GDELT TimelineTone per region. Tone captures the valence of propagating expression — stress or relief moving through the media ritual chain; velocity (ΔN) captures activation, the rate at which that expression is propagating. Narrative is not a peer to attention; it is the channel through which affect propagates and deposits.
 
 **Market (M)** — material, responsive. Yahoo Finance indices proxied through the Render backend. The realised behavioural discharge of collectively constituted affect — the collapse of the expressive field into decision.
 
@@ -155,13 +155,13 @@ The label is assigned to the nearest attractor. Visual position in coupling spac
 
 | Axis | Source | Method | Status |
 |------|--------|--------|--------|
-| Market (M) | Yahoo Finance | Proxied via Render (direct cloud calls blocked) | Live |
-| Attention (A) | Wikimedia Pageviews API | Browser-direct | Live |
-| Narrative (N) | GDELT Project | Proxied via Render (rate-limited 1 req/5s) | Live |
+| Market (M) | Yahoo Finance (via Alpha Vantage + FRED) | Backend — `animalspirits-api.onrender.com` | Live |
+| Attention (A) | Wikimedia Pageviews API | Backend — computed from 4 cluster × 3 region terms | Live |
+| Narrative (N) | GDELT TimelineTone | Backend — per-region tone scalar | Live |
 
 Live status indicated by M● S● N● badge. When a source is unavailable the corresponding signal falls back to the synthetic model.
 
-**Backend:** FastAPI on Render (`animalspirits-api.onrender.com`). Cold-start delay up to 90 seconds; the client polls with backoff.
+**Backend:** FastAPI on Render (`animalspirits-api.onrender.com`). Computes and normalises all three axes, writes to `state.json`, and serves via `/api/state`. The frontend makes a single fetch to this endpoint — all signal processing happens server-side. Cold-start delay up to 90 seconds; the client retries with backoff.
 
 ---
 
