@@ -141,6 +141,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
     <div class="live-row">
       <div class="pulse" id="pdot"></div>
       <span class="tdisp">24h rolling</span>
+      <span class="api-status" id="api-badge" style="margin-left:6px">A○ M○ N○</span>
     </div>
     <div class="tdisp" id="tdisp"></div>
   </div>
@@ -164,7 +165,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
     <div class="ak-item"><div class="ak-sq"  style="background:var(--c-M)"></div>market</div>
     <div class="ak-item"><div class="ak-di"  style="background:var(--c-N)"></div>narrative</div>
   </div>
-  <span class="api-status" id="api-badge">M○ A○ N○</span>
 </div>
 
 <div class="map-wrap">
@@ -184,7 +184,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
   </div>
 
   <div class="cplane-wrap">
-    <div class="cplane-title">coupling space</div>
+    <div class="cplane-title">coupling dynamics</div>
     <canvas id="cplane-canvas" width="110" height="110"></canvas>
   </div>
 </div>
@@ -920,7 +920,7 @@ function buildPanels(){
     // Header — regime from attractor proximity (fix #6), no Ψ (fix #5)
     h+=`<div class="pn-regime" style="color:${st.regimeColor}">${st.regime}</div>`;
     h+=`<div class="pn-name">${rg.label}</div>`;
-    h+=`<div class="pn-sub">I ${st.I.toFixed(2)} · E_spread ${st.E_spread.toFixed(2)}</div>`;
+    h+=`<div class="pn-sub">instability ${st.I.toFixed(2)}</div>`;
 
     // Sparklines
     h+=`<div class="spark-section">
@@ -950,7 +950,7 @@ function buildPanels(){
         <div class="cm-val" style="color:${fbPos?C_EXP:C_CON}">${st.C_sync>=0?'+':''}${st.C_sync.toFixed(2)}</div>
       </div>
       <div class="cm-row">
-        <div class="cm-lbl">lag* (conf)</div>
+        <div class="cm-lbl">lag (wtd)</div>
         <div class="cm-track"><div class="cm-fill" style="width:${lagW}%;background:${C_LAG}"></div></div>
         <div class="cm-val" style="color:${C_LAG}">${st.C_lag.toFixed(2)}</div>
       </div>
@@ -960,7 +960,7 @@ function buildPanels(){
         <div class="inst-val" style="color:${st.I>0.55?C_STAG:'var(--text3)'}">${st.I.toFixed(2)}</div>
       </div>
       <div class="ediv-row">
-        <div class="ediv-lbl" style="color:var(--text3)">E_spread <span style="font-size:6px;opacity:0.6">▸v3</span></div>
+        <div class="ediv-lbl" style="color:var(--text3)">expr. div. <span style="font-size:6px;opacity:0.5">▸v3</span></div>
         <div class="ediv-track"><div class="ediv-fill" style="width:${espW}%;background:${C_STAG}80"></div></div>
         <div class="ediv-val" style="color:var(--text3)">${st.E_spread.toFixed(2)}</div>
       </div>
@@ -1037,14 +1037,18 @@ function updateRegimeCursor(states){
 // ═══════════════════════════════════════════════════════════════════════
 // LAYER 5 — DATA ACQUISITION
 // ═══════════════════════════════════════════════════════════════════════
-const STATE_URL='https://raw.githubusercontent.com/Super-futures/animal-spirits-api/main/data/state.json';
+// state.json is served from the API repo via GitHub Pages.
+// raw.githubusercontent.com blocks CORS — use Pages URL instead.
+// If the API repo has Pages enabled at super-futures.github.io/animal-spirits-api,
+// that URL is same-origin-friendly. Fallback: cors proxy.
+const STATE_URL='https://super-futures.github.io/animal-spirits-api/data/state.json';
 
 function updateAPIBadge(){
+  const a=axisStatus.attention?'A●':'A○';
   const m=axisStatus.market?'M●':'M○';
-  const s=axisStatus.attention?'A●':'A○';
   const n=axisStatus.narrative?'N●':'N○';
-  const html=`<span style="color:${axisStatus.market?C_EXP:'var(--text3)'}">${m}</span> `+
-             `<span style="color:${axisStatus.attention?C_A:'var(--text3)'}">${s}</span> `+
+  const html=`<span style="color:${axisStatus.attention?C_A:'var(--text3)'}">${a}</span> `+
+             `<span style="color:${axisStatus.market?C_EXP:'var(--text3)'}">${m}</span> `+
              `<span style="color:${axisStatus.narrative?C_N:'var(--text3)'}">${n}</span>`;
   const el=document.getElementById('api-badge'); if(el) el.innerHTML=html;
 }
@@ -1061,7 +1065,9 @@ async function fetchWithWake(url){
 
 async function fetchLiveData(){
   const state=await fetchWithWake(STATE_URL);
-  if(!state?.regions) return;
+  if(!state?.regions){
+      return;
+  }
 
   window.liveState = state;
 
@@ -1087,13 +1093,13 @@ function updateTime(){
 }
 
 document.getElementById('footer-text').textContent=
-  'Three axes — attention (expressive, compositional), narrative (expressive, dynamic), market (material, responsive) — form a coupled dynamical assemblage. '+
+  'Three axes — attention (expressive, compositional), market (material, responsive), narrative (expressive, dynamic) — form a coupled dynamical assemblage. '+
   'Alignment measures magnitude-weighted proximity of expressive and material fields. '+
   'Synchrony (C_sync) captures co-movement — symmetric, not directional; directional coupling is a v3 direction. '+
   'Lag is confidence-weighted phase offset: near-zero when the best-fit delay is weakly corroborated. '+
   'Regime emerges as proximity to named attractors in coupling space — expansion, contraction, instability — not from threshold conditions. '+
   'Instability is deterritorialisation: breakdown of coupling. '+
-  'E_spread exposes internal expressive divergence (A vs N vs ΔN); it is displayed but does not yet enter coupling computation. '+
+  'Expressive divergence (expr. div.) measures internal tension across the A, N, and ΔN components; displayed but not yet coupled — a v3 direction. '+
   'Cluster composition (anxiety · confidence · aspiration · constraint) enters as scalar A — vectorised attention is a v3 direction. '+
   'After DeLanda · Collins · Bakhtin · Keynes.';
 
