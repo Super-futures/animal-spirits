@@ -1,83 +1,204 @@
 # Animal Spirits
 
-A live observatory reading three signals of collective economic state across three regions.
-
-Attention, narrative, and market are read continuously, smoothed, and projected into a shared field. The system does not predict. It traces what is moving, where, and whether those movements are aligned.
-
-**Live:** [super-futures.github.io/animal-spirits](https://super-futures.github.io/animal-spirits)
-**Backend:** [super-futures/animal-spirits-api](https://github.com/super-futures/animal-spirits-api)
-**Data feed:** [state.json](https://super-futures.github.io/animal-spirits-api/data/state.json) — refreshed every 15 minutes.
+*A real-time interface for reading the constitutive dynamics of collective economic affect.*
 
 ---
 
-## The three signals
+## What it is
 
-| Signal | What it reads | Source |
-|---|---|---|
-| **Attention** | Collective search and reading activity across four affect clusters (anxiety, confidence, aspiration, constraint), combined into a single magnitude per region | Wikimedia Pageviews API (32 articles per region, z-scored against a 29-day baseline) |
-| **Narrative** | The tone of news carrying the moment — currently derived from the anxiety cluster, as the most reactive channel | GDELT DOC 2.0 TimelineTone, sourcecountry-scoped |
-| **Market** | Regional equity state, blended with global macro stress | Alpha Vantage ETF proxies (SPY, ISF.LON, NIFTYBEES.BSE) + FRED (VIX, high-yield spread, dollar index) |
+Animal Spirits observes the expressive and material dimensions of collective economic life across three regions simultaneously — US/Europe, UK, and India. It does not predict markets. It does not aggregate sentiment scores. It reads the **coupling** between distributed addressed expression and realised economic behaviour, and surfaces the regime that emerges from that coupling.
 
-Each signal can lead, lag, or diverge from the others. The relationships between them — not any one reading alone — are what the interface surfaces.
+The project takes seriously Keynes' choice of the word *animal* in "animal spirits." Not *human* spirits — *animal*: the animate substrate of collective life, prior to and underneath the specific configurations that get called rational or irrational. Markets are not contaminated by affect; they are constituted through it. Animal Spirits makes that constitutive process visible.
 
-## Three regions
+---
 
-United States, United Kingdom, India.
+## Theoretical grounding
 
-## Reading the field
+The model draws on four intellectual lineages, each doing specific work that the others cannot:
 
-The system renders three collective states continuously — **Expansion**, **Contraction**, **Instability** (bull, bear, stag in the Keynesian register). These are not categories but probabilities emerging from a latent field Ψ composed of the three signals.
+**Keynes (1936)** — named the affective substrate of economic decision-making as an irreducible constitutive condition, not a residual error. In the *General Theory*, animal spirits are "a spontaneous urge to action rather than inaction" — not the irrational residual in otherwise rational markets, but the condition that makes action under genuine uncertainty possible at all. Without them, expected-utility calculation under radical uncertainty cannot generate decision. The animal spirits are what markets run on, not what contaminates them.
 
-Each panel shows a **posture** — Lean, Caution, or Pause — describing how the signals are holding together:
+**Bakhtin** — all utterance is addressed. The dialogic structure of language anticipates and is shaped by the response of an other, and this structure is operative whether or not a co-present interlocutor exists. News cycles, market commentary, financial media, and social platforms instantiate addressed expression at scale: every story is shaped by an imagined reception, every price signal is read against anticipated response. Collective economic affect is not merely reflected in distributed expression — it is constituted through it. The other is baked into the language.
 
-- **Lean** — signals are aligned; the field is coherent
-- **Caution** — signals are diverging; attention and markets are out of sync
-- **Pause** — instability elevated; the field has lost coherence
+**Collins (2004)** — interaction ritual chain theory specifies the mechanism by which emotional energy is produced in successful communicative encounters, accumulated through ritual chains, and discharged into action. Markets are ritual chains at scale: attention, narrative, and market behaviour form a chain through which affect is deposited, held, and discharged. Stag is collective failed ritual — high expressive activity, no integration, no accumulation. The spring does not load.
 
-The posture is interpretive. The probabilities are generative.
+**DeLanda (2016)** — assemblage theory. Every human assemblage has material and expressive components. Neither reduces to the other; relations between assemblages are external, not internal. The economic affect-narrative-market system is a cybernetic assemblage: expressive components (attention, narrative) coupled to material components (market behaviour), with regime states as emergent attractors and phase transitions as deterritorialisation events. No scale is privileged — individuals and collectives are equally real assemblages constituted through the same mechanism at different resolutions.
 
-## The visual grammar
+Together these lineages support a single claim: **collective economic affect is constituted through distributed addressed expression, and the conditions of that constitution are readable from the expressive and material infrastructure that produces it.** Contagion is not transmission — it is constitutive cascade, the dialogic field reorganising. Stag is not a third regime alongside bull and bear — it is the condition in which the constitutive process is active but failing to integrate.
 
-- **Attention blooms** — warm, diffuse. Size encodes magnitude; diffusion encodes uncertainty.
-- **Market cells** — cool, defined. Position encodes regime; size encodes conviction.
-- **Narrative arrows** — direction encodes tone; length encodes magnitude; change encodes acceleration.
-- **A ↔ M offset** — spatial distance between attention and market encodes temporal lag.
-- **Ψ contour** — boundary where expansion tips into contraction across the field.
-
-## What it is, what it isn't
-
-Animal Spirits is an observational instrument, not a predictive model or trading signal. It treats economic and emotional behaviour as temporally entangled rather than causally linear: attention, narrative, and market signals co-evolve; none is privileged as the sole driver.
-
-The interface is the argument — a continuous field rather than a discrete dashboard.
-
-The intellectual lineage runs through Keynes (animal spirits), Shiller (narrative economics), and traditions of affective mapping in media art and critical design. A formal paper on the three-axis framework is in preparation.
+---
 
 ## Architecture
 
-This repository is the frontend — a single `index.html` using D3 and Canvas, polling a static `state.json` feed every 5 minutes.
+The codebase is organised into six explicitly separated layers:
 
-The backend ([animal-spirits-api](https://github.com/super-futures/animal-spirits-api)) runs as a scheduled GitHub Actions workflow, composing state every 15 minutes from Wikimedia, Alpha Vantage, FRED, and GDELT, and committing to `data/state.json`. There is no server. The commit history of `state.json` forms a growing time-series dataset.
-
-## Run locally
-
-```bash
-git clone https://github.com/super-futures/animal-spirits.git
-cd animal-spirits
-python3 -m http.server 8000
+```
+Layer 0 — Configuration      (constants, weights, attractor centres)
+Layer 1 — Signal Acquisition  (raw signal accessors — swappable)
+Layer 2 — Signal Processing   (RegionProcessor — all coupling computation)
+Layer 3 — Synthesis           (state cache, synthetic fallback)
+Layer 4 — Rendering           (map, coupling planes, panels — reads state only)
+Layer 5 — Data Acquisition    (live fetch — Render API, Wikimedia, GDELT)
+Layer 6 — Initialisation      (boot, tick, resize)
 ```
 
-Open `http://localhost:8000`.
+**To change data sources:** replace Layer 1 accessors only. Processing and rendering layers are untouched. This is the v3 pathway for Google Trends Alpha, richer sentiment pipelines, and vectorised attention.
 
-## Status
+---
 
-**v1.1** — three signals, three regions, continuous regime.
+## The model
 
-Attention combines the four affect clusters via a root-mean-square, which preserves the magnitude of any cluster's activation without collapsing opposing surges into nothing. The compositional structure of attention exists upstream but is reduced to a scalar before entering the field — a more structured reading (carrying the four-cluster vector through Ψ, exposing the mix in the interface) is the central target for v2.
+### Three axes
 
-Narrative is currently derived from the anxiety cluster as a reactive-channel proxy. Future refinement will focus on how this signal is constructed rather than on averaging additional clusters into it.
+**Attention (A)** — expressive, compositional. Wikimedia pageviews across four affect cluster terms (anxiety, confidence, aspiration, constraint), combined as RMS to preserve magnitude without mean-cancellation. Enters the expressive field as a scalar; compositional structure is displayed in panels but does not yet enter coupling computation. Vectorised A is a v3 direction.
 
-Attention uses a static 30-day baseline; a rolling baseline is a near-term update.
+**Narrative (N)** — expressive, dynamic. GDELT tone and volume proxied through the Render backend. Tone captures the valence of propagating expression — stress or relief moving through the media ritual chain; velocity (ΔN) captures activation, the rate at which that expression is propagating. Narrative is not a peer to attention; it is the channel through which affect propagates and deposits.
 
-## Maintainer
+**Market (M)** — material, responsive. Yahoo Finance indices proxied through the Render backend. The realised behavioural discharge of collectively constituted affect — the collapse of the expressive field into decision.
 
-Leon — [Superfutures](https://github.com/super-futures), Auckland.
+### Expressive field
+
+```
+E = w_A·A_z + w_N·N_z + w_V·ΔN_z
+```
+
+where all components are z-scored over the same rolling window W. E is a scalar — it compresses internal structure. **E_spread** exposes this compression:
+
+```
+E_spread = mean(|A_z − N_z|, |A_z − ΔN_z|, |N_z − ΔN_z|)
+```
+
+High E_spread with stable E indicates an internally tense expressive field: the components are diverging even though the net field is stable. E_spread is displayed in panels and affects bloom diffusion on the map. It does not yet enter coupling computation — vectorised E is a v3 direction.
+
+### Coupling metrics
+
+Three metrics characterise the relationship between the expressive field (E) and the material field (M_z):
+
+**(a) Alignment (C_align)** — magnitude-weighted proximity.
+
+```
+rawProximity = 1 − |E − M_z| / 2
+magWeight    = sigmoid((|E| + |M_z|) · 1.5 − 1.5)
+C_align      = rawProximity · magWeight + 0.5 · (1 − magWeight)
+```
+
+When both signals are near zero, alignment is suppressed toward neutral (≈0.5) rather than reading as falsely well-aligned. High alignment requires both signals to be meaningfully elevated and proximate.
+
+**(b) Synchrony (C_sync)** — co-movement of changes.
+
+```
+C_sync = Pearson(ΔE_{t−W:t}, ΔM_{t−W:t})
+```
+
+Named *synchrony*, not feedback: this metric is symmetric. It measures whether expressive and material changes co-move, not which is driving which. Positive synchrony = expansion co-movement. Negative synchrony = contraction co-movement. Directional coupling is a v3 direction.
+
+**(c) Lag (C_lag)** — confidence-weighted phase offset.
+
+```
+bestTau, bestR = argmax_τ Pearson(E_{t−τ}, M_t)  for τ ∈ [−τ_max, τ_max]
+C_lag          = (|bestTau| / τ_max) · max(0, bestR)
+```
+
+C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakly corroborated, non-zero only when a phase offset is both large and well-supported. Lag sign is preserved separately (negative = E leads, positive = M leads) and encoded visually as ring colour on the coupling planes.
+
+### Ψ — rendering instrument
+
+```
+Ψ = 0.5·C_align + 0.35·max(0, C_sync) − 0.15·C_lag
+```
+
+Ψ is a rendering parameter, not a descriptive summary. It drives the spatial displacement of attention and market blobs on the map. The primary state representation is the position vector **(C_align, C_sync, C_lag, I)**. Ψ is not displayed in panels.
+
+### Instability
+
+```
+I = clip((1 − C_align) + (1 − |C_sync|) + C_lag, 0, 1) / 3
+```
+
+Instability is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime — it is a condition of the assemblage, present in any regime to varying degrees.
+
+### Regime
+
+Regime is assigned by proximity to named attractors in **(C_align, C_sync)** space:
+
+| Attractor | C_align | C_sync | Reading |
+|-----------|---------|--------|---------|
+| Expansion | 0.75 | +0.55 | Fields reinforcing — high alignment, positive co-movement |
+| Contraction | 0.75 | −0.55 | Fields contracting — high alignment, negative co-movement |
+| Instability | 0.25 | 0.00 | Fields decoupled — low alignment, weak synchrony |
+
+The label is assigned to the nearest attractor. Visual position in coupling space and computed regime label speak the same language — both are continuous-space readings, not threshold conditions.
+
+---
+
+## Visual grammar
+
+**Attention bloom** — warm amber, radial gradient. Radius encodes intensity. Outer ring encodes C_lag magnitude; ring colour encodes lag direction (amber = E leading, blue = M leading).
+
+**Market rectangle** — cool blue, rounded rectangle. Size encodes M_z magnitude.
+
+**Narrative arrows** — purple, directional. Direction encodes propagation direction; number and length encode volume and velocity.
+
+**A↔M offset** — dashed line between bloom and rectangle. Presence and dash pattern encode decoupling.
+
+**Instability ring** — amber dashed ring around the region. Appears when I > 0.45.
+
+**E_spread halo** — subtle dashed halo on attention bloom. Appears when internal expressive components diverge significantly.
+
+**Coupling plane** — 2D canvas showing position in (C_align × C_sync) space. Ring around each dot encodes C_lag. Three named attractor regions softly shaded. Inset on map (all regions) and per-region below panels.
+
+**Regime tilt strip** — horizontal gradient in controls. Cursor driven by mean C_sync across regions.
+
+---
+
+## Data sources
+
+| Axis | Source | Method | Status |
+|------|--------|--------|--------|
+| Market (M) | Yahoo Finance | Proxied via Render (direct cloud calls blocked) | Live |
+| Attention (A) | Wikimedia Pageviews API | Browser-direct | Live |
+| Narrative (N) | GDELT Project | Proxied via Render (rate-limited 1 req/5s) | Live |
+
+Live status indicated by M● S● N● badge. When a source is unavailable the corresponding signal falls back to the synthetic model.
+
+**Backend:** FastAPI on Render (`animalspirits-api.onrender.com`). Cold-start delay up to 90 seconds; the client polls with backoff.
+
+---
+
+## Known limitations and v3 directions
+
+**Scalar attention (current):** A enters E as a scalar (RMS of four clusters). The compositional structure of the affect field does not enter coupling computation. E_spread partially exposes this tension.
+
+**v3 direction — vectorised attention:** A enters E as a 2D vector (valence × accumulation), with the four clusters as named quadrants. Each cluster carries its own coupling signature to the market field. Requires Google Trends Alpha or a richer sentiment pipeline via institutional credentials.
+
+**Symmetric synchrony (current):** C_sync is symmetric co-movement. It does not distinguish which field is driving which.
+
+**v3 direction — directional coupling:** Granger causality or lagged regression over longer windows.
+
+**Scalar E (current):** Distinct expressive configurations can produce identical E values. E_spread partially exposes this.
+
+**v3 direction — vectorised E:** E as a 2D or 3D vector preserving internal structure through to coupling computation. Regime dynamics become cluster-aware.
+
+---
+
+## Deployment
+
+- **Frontend:** `animal-spirits.netlify.app` / `super-futures.github.io/animalspirits`
+- **Backend:** `animalspirits-api.onrender.com`
+- **Stack:** Vanilla HTML/JS/D3/Canvas · FastAPI · Render · Netlify
+
+---
+
+## Version history
+
+| Version | Description |
+|---------|-------------|
+| v0.2 | Four affect clusters, three regions, simulated data, temporal layering per cluster |
+| v0.8 | Three axes (A/M/N), three regions, live data, regime probabilities from Ψ |
+| v1.0 | Signal processing layer, regime dynamics, global headline |
+| v1.1 | Legibility pass — posture vocabulary, axis key, tightened panels |
+| v2.0 | Coupling-based architecture — expressive/material separation, C_align/C_sync/C_lag, attractor-space regime, six-layer clean separation |
+
+---
+
+*Superfutures · v2.0*
