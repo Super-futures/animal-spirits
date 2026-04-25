@@ -38,7 +38,7 @@ Layer 1 — Signal Acquisition  (raw signal accessors — swappable)
 Layer 2 — Signal Processing   (RegionProcessor — all coupling computation)
 Layer 3 — Synthesis           (state cache, synthetic fallback)
 Layer 4 — Rendering           (map, coupling planes, panels — reads state only)
-Layer 5 — Data Acquisition    (single fetch — /api/state endpoint)
+Layer 5 — Data Acquisition    (single fetch — state.json via GitHub Pages)
 Layer 6 — Initialisation      (boot, tick, resize)
 ```
 
@@ -52,9 +52,9 @@ Layer 6 — Initialisation      (boot, tick, resize)
 
 **Attention (A)** — expressive, compositional. Computed by the backend from Wikimedia pageviews across four affect cluster terms (anxiety, confidence, aspiration, constraint). Enters the expressive field as a scalar; compositional structure is not currently exposed by the backend API. Vectorised A is a v3 direction.
 
-**Narrative (N)** — expressive, dynamic. Computed by the backend from GDELT TimelineTone per region. Tone captures the valence of propagating expression — stress or relief moving through the media ritual chain; velocity (ΔN) captures activation, the rate at which that expression is propagating. Narrative is not a peer to attention; it is the channel through which affect propagates and deposits.
+**Market (M)** — material, responsive. Computed by the backend from Yahoo Finance indices (via Alpha Vantage) and FRED stress indicators. The realised behavioural discharge of collectively constituted affect — the collapse of the expressive field into decision.
 
-**Market (M)** — material, responsive. Yahoo Finance indices proxied through the Render backend. The realised behavioural discharge of collectively constituted affect — the collapse of the expressive field into decision.
+**Narrative (N)** — expressive, dynamic. Computed by the backend from GDELT TimelineTone per region. Tone captures the valence of propagating expression — stress or relief moving through the media ritual chain; velocity (ΔN) captures activation, the rate at which that expression is propagating. Narrative is not a peer to attention; it is the channel through which affect propagates and deposits.
 
 ### Expressive field
 
@@ -62,13 +62,13 @@ Layer 6 — Initialisation      (boot, tick, resize)
 E = w_A·A_z + w_N·N_z + w_V·ΔN_z
 ```
 
-where all components are z-scored over the same rolling window W. E is a scalar — it compresses internal structure. **E_spread** exposes this compression:
+where all components are z-scored over the same rolling window W. E is a scalar — it compresses internal structure. **Expressive divergence** (displayed as *expr. div.*) exposes this compression:
 
 ```
-E_spread = mean(|A_z − N_z|, |A_z − ΔN_z|, |N_z − ΔN_z|)
+expr_div = mean(|A_z − N_z|, |A_z − ΔN_z|, |N_z − ΔN_z|)
 ```
 
-High E_spread with stable E indicates an internally tense expressive field: the components are diverging even though the net field is stable. E_spread is displayed in panels and affects bloom diffusion on the map. It does not yet enter coupling computation — vectorised E is a v3 direction.
+High expr. div. with stable E indicates an internally tense expressive field: the components are diverging even though the net field is stable. Displayed in panels and affects bloom diffusion on the map. Does not yet enter coupling computation — vectorised E is a v3 direction.
 
 ### Coupling metrics
 
@@ -143,7 +143,7 @@ The label is assigned to the nearest attractor. Visual position in coupling spac
 
 **Instability ring** — amber dashed ring around the region. Appears when I > 0.45.
 
-**E_spread halo** — subtle dashed halo on attention bloom. Appears when internal expressive components diverge significantly.
+**Expressive divergence halo** — subtle dashed halo on attention bloom. Appears when internal expressive components (A, N, ΔN) diverge significantly.
 
 **Coupling plane** — 2D canvas showing position in (C_align × C_sync) space. Ring around each dot encodes C_lag. Three named attractor regions softly shaded. Inset on map (all regions) and per-region below panels.
 
@@ -155,19 +155,19 @@ The label is assigned to the nearest attractor. Visual position in coupling spac
 
 | Axis | Source | Method | Status |
 |------|--------|--------|--------|
-| Market (M) | Yahoo Finance (via Alpha Vantage + FRED) | Backend — `animalspirits-api.onrender.com` | Live |
-| Attention (A) | Wikimedia Pageviews API | Backend — computed from 4 cluster × 3 region terms | Live |
+| Market (M) | Yahoo Finance (via Alpha Vantage + FRED) | Backend — GitHub Actions | Live |
+| Attention (A) | Wikimedia Pageviews API | Backend — 4 cluster × 3 region terms | Live |
 | Narrative (N) | GDELT TimelineTone | Backend — per-region tone scalar | Live |
 
-Live status indicated by M● S● N● badge. When a source is unavailable the corresponding signal falls back to the synthetic model.
+Live status indicated by A● M● N● badge in the header. When a source is unavailable the corresponding signal falls back to the synthetic model.
 
-**Backend:** FastAPI on Render (`animalspirits-api.onrender.com`). Computes and normalises all three axes, writes to `state.json`, and serves via `/api/state`. The frontend makes a single fetch to this endpoint — all signal processing happens server-side. Cold-start delay up to 90 seconds; the client retries with backoff.
+**Backend:** GitHub Actions workflow in `Super-futures/animal-spirits-api`. Runs on a schedule, computes and normalises all three axes, and writes `data/state.json` to the repo. The API repo has GitHub Pages enabled, serving `state.json` at `https://super-futures.github.io/animal-spirits-api/data/state.json` with permissive CORS headers. The frontend makes a single cache-busted fetch to this URL — all signal processing happens in the workflow.
 
 ---
 
 ## Known limitations and v3 directions
 
-**Scalar attention (current):** A enters E as a scalar (RMS of four clusters). The compositional structure of the affect field does not enter coupling computation. E_spread partially exposes this tension.
+**Scalar attention (current):** A enters E as a scalar (RMS of four clusters). The compositional structure of the affect field does not enter coupling computation. Expressive divergence (expr. div.) partially exposes this tension.
 
 **v3 direction — vectorised attention:** A enters E as a 2D vector (valence × accumulation), with the four clusters as named quadrants. Each cluster carries its own coupling signature to the market field. Requires Google Trends Alpha or a richer sentiment pipeline via institutional credentials.
 
@@ -175,7 +175,7 @@ Live status indicated by M● S● N● badge. When a source is unavailable the 
 
 **v3 direction — directional coupling:** Granger causality or lagged regression over longer windows.
 
-**Scalar E (current):** Distinct expressive configurations can produce identical E values. E_spread partially exposes this.
+**Scalar E (current):** Distinct expressive configurations can produce identical E values. Expressive divergence (expr. div.) partially exposes this.
 
 **v3 direction — vectorised E:** E as a 2D or 3D vector preserving internal structure through to coupling computation. Regime dynamics become cluster-aware.
 
@@ -183,9 +183,9 @@ Live status indicated by M● S● N● badge. When a source is unavailable the 
 
 ## Deployment
 
-- **Frontend:** `animal-spirits.netlify.app` / `super-futures.github.io/animalspirits`
-- **Backend:** `animalspirits-api.onrender.com`
-- **Stack:** Vanilla HTML/JS/D3/Canvas · FastAPI
+- **Frontend:** `super-futures.github.io/animalspirits` (GitHub Pages — `Super-futures/animalspirits`)
+- **Backend:** `super-futures.github.io/animal-spirits-api/data/state.json` (GitHub Pages — `Super-futures/animal-spirits-api`)
+- **Stack:** Vanilla HTML/JS/D3/Canvas · Python/GitHub Actions · GitHub Pages
 
 ---
 
