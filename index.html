@@ -1037,7 +1037,7 @@ function updateRegimeCursor(states){
 // ═══════════════════════════════════════════════════════════════════════
 // LAYER 5 — DATA ACQUISITION
 // ═══════════════════════════════════════════════════════════════════════
-const API_URL='https://animalspirits-api.onrender.com';
+const STATE_URL='https://raw.githubusercontent.com/Super-futures/animal-spirits-api/main/data/state.json';
 
 function updateAPIBadge(){
   const m=axisStatus.market?'M●':'M○';
@@ -1049,21 +1049,18 @@ function updateAPIBadge(){
   const el=document.getElementById('api-badge'); if(el) el.innerHTML=html;
 }
 
-// Single fetch replaces three separate pipelines.
-// The backend computes and normalises all three axes; we trust its output.
-// Retries with backoff to handle Render cold starts (up to 90s).
-async function fetchWithWake(url, maxMs=90000){
-  try{ const r=await fetch(url); if(r.ok) return await r.json(); }catch(e){}
-  const start=Date.now();
-  while(Date.now()-start<maxMs){
-    await new Promise(res=>setTimeout(res,12000));
-    try{ const r=await fetch(url); if(r.ok) return await r.json(); }catch(e){}
-  }
+// Single fetch from GitHub raw — no cold start, no retry loop needed.
+// GitHub Actions writes state.json on a schedule; we just read it.
+async function fetchWithWake(url){
+  try{
+    const r=await fetch(url+'?t='+Date.now()); // cache-bust
+    if(r.ok) return await r.json();
+  }catch(e){}
   return null;
 }
 
 async function fetchLiveData(){
-  const state=await fetchWithWake(API_URL+'/api/state', 90000);
+  const state=await fetchWithWake(STATE_URL);
   if(!state?.regions) return;
 
   window.liveState = state;
