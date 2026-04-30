@@ -20,11 +20,27 @@ The model draws on four intellectual lineages, each doing specific work that the
 
 **Bakhtin** — all utterance is addressed. The dialogic structure of language anticipates and is shaped by the response of an other, and this structure is operative whether or not a co-present interlocutor exists. News cycles, market commentary, financial media, and social platforms instantiate addressed expression at scale: every story is shaped by an imagined reception, every price signal is read against anticipated response. Collective economic affect is not merely reflected in distributed expression — it is constituted through it. The other is baked into the language.
 
-**Collins (2004)** — interaction ritual chain theory specifies the mechanism by which emotional energy is produced in successful communicative encounters, accumulated through ritual chains, and discharged into action. Markets are ritual chains at scale: attention, narrative, and market behaviour form a chain through which affect is deposited, held, and discharged. Instability (formerly "stag") is collective failed ritual — high expressive activity, no integration, no accumulation. The spring does not load.
+**Collins (2004)** — interaction ritual chain theory specifies the mechanism by which emotional energy is produced in successful communicative encounters, accumulated through ritual chains, and discharged into action. Markets are ritual chains at scale: attention, narrative, and market behaviour form a chain through which affect is deposited, held, and discharged. Instability is collective failed ritual — high expressive activity, no integration, no accumulation. The spring does not load.
 
 **DeLanda (2016)** — assemblage theory. Every human assemblage has material and expressive components. Neither reduces to the other; relations between assemblages are external, not internal. The economic affect-narrative-market system is a cybernetic assemblage: expressive components (attention, narrative) coupled to material components (market behaviour), with regime states as emergent attractors and phase transitions as deterritorialisation events. No scale is privileged — individuals and collectives are equally real assemblages constituted through the same mechanism at different resolutions.
 
 Together these lineages support a single claim: **collective economic affect is constituted through distributed addressed expression, and the conditions of that constitution are readable from the expressive and material infrastructure that produces it.** Contagion is not transmission — it is constitutive cascade, the dialogic field reorganising. Instability is not a third regime alongside expansion and contraction — it is the condition in which the constitutive process is active but failing to integrate.
+
+---
+
+## Ontological mapping
+
+The three observable axes map cleanly onto DeLanda's material/expressive distinction:
+
+| Component | Axis | Source |
+|-----------|------|--------|
+| **Expressive** | Attention (A) — compositional | Wikimedia pageviews |
+| **Expressive** | Narrative (N) — dynamic, propagating | GDELT TimelineTone |
+| **Material** | Market (M) — realised behaviour | Yahoo Finance / FRED |
+
+Attention and narrative together compose the **expressive field (E)** — the addressed, dialogic substrate through which collective affect circulates. Market is the **material field (M)** — the realised behavioural discharge.
+
+This mapping is not metaphor. It is the operational form of the assemblage: two distinct ontological components, irreducible to each other, coupled through computable relations.
 
 ---
 
@@ -33,11 +49,11 @@ Together these lineages support a single claim: **collective economic affect is 
 The codebase is organised into six explicitly separated layers:
 
 ```
-Layer 0 — Configuration      (constants, weights, attractor centres)
+Layer 0 — Configuration       (constants, weights, attractor centres)
 Layer 1 — Signal Acquisition  (raw signal accessors — swappable)
-Layer 2 — Signal Processing   (RegionProcessor — all coupling computation)
+Layer 2 — Signal Processing   (RegionProcessor — coupling computation)
 Layer 3 — Synthesis           (state cache, synthetic fallback)
-Layer 4 — Rendering           (map, quadrant inset, panels — reads state only)
+Layer 4 — Rendering           (map, ternary plot, panels — reads state only)
 Layer 5 — Data Acquisition    (single fetch — state.json via GitHub Pages)
 Layer 6 — Initialisation      (boot, tick, resize)
 ```
@@ -48,58 +64,72 @@ Layer 6 — Initialisation      (boot, tick, resize)
 
 ## The model
 
-### Three axes
+### The expressive field
 
-**Attention (A)** — expressive, compositional. Computed by the backend from Wikimedia pageviews across four affect cluster terms (anxiety, confidence, aspiration, constraint). Enters the expressive field as a scalar; compositional structure is not currently exposed by the backend API. Vectorised A is a v3 direction.
-
-**Market (M)** — material, responsive. Computed by the backend from Yahoo Finance indices (via Alpha Vantage) and FRED stress indicators. The realised behavioural discharge of collectively constituted affect — the collapse of the expressive field into decision.
-
-**Narrative (N)** — expressive, dynamic. Computed by the backend from GDELT TimelineTone per region. Tone captures the valence of propagating expression — stress or relief moving through the media ritual chain; velocity (ΔN) captures activation, the rate at which that expression is propagating. Narrative is not a peer to attention; it is the channel through which affect propagates and deposits.
-
-### Expressive field
+The expressive components combine into a single field:
 
 ```
-E = w_A·A_z + w_N·N_z + w_V·ΔN_z
+E = w_A · A_z  +  w_N · N_z  +  w_V · ΔN_z
 ```
 
-where all components are z-scored over the same rolling window W. E is a scalar — it compresses internal structure. **Expressive divergence** (displayed as *expr. div.*) exposes this compression:
+where all components are z-scored over the same rolling window W. E is a scalar — it compresses internal expressive structure. **Expressive divergence** (displayed in panels as *expr. div.*) exposes this compression:
 
 ```
-expr_div = mean(|A_z − N_z|, |A_z − ΔN_z|, |N_z − ΔN_z|)
+expr_div = mean( |A_z − N_z|, |A_z − ΔN_z|, |N_z − ΔN_z| )
 ```
 
-High expr. div. with stable E indicates an internally tense expressive field: the components are diverging even though the net field is stable. Displayed in panels and affects bloom diffusion on the map. Does not yet enter coupling computation — vectorised E is a v3 direction.
+High expr. div. with stable E indicates an internally tense expressive field: the components are diverging even though the net field reads stable. This affects bloom diffusion on the map but does not yet enter coupling computation directly — vectorised E is a v3 direction.
 
 ### Coupling metrics
 
 Three metrics characterise the relationship between the expressive field (E) and the material field (M_z):
 
-**(a) Alignment (C_align)** — magnitude-weighted proximity.
+**(a) Alignment (C_align)** — magnitude-weighted proximity of E and M.
 
 ```
 rawProximity = 1 − |E − M_z| / 2
-magWeight    = sigmoid((|E| + |M_z|) · 1.5 − 1.5)
-C_align      = rawProximity · magWeight + 0.5 · (1 − magWeight)
+magWeight    = sigmoid( (|E| + |M_z|) · 1.5 − 1.5 )
+C_align      = rawProximity · magWeight  +  0.5 · (1 − magWeight)
 ```
 
-When both signals are near zero, alignment is suppressed toward neutral (≈0.5) rather than reading as falsely well-aligned. High alignment requires both signals to be meaningfully elevated and proximate.
+When both signals are near zero, alignment is suppressed toward neutral (≈0.5) rather than reading as falsely well-aligned. High alignment requires both fields to be meaningfully elevated and proximate.
 
-**(b) Synchrony (C_sync)** — co-movement of changes.
+**(b) Synchrony (C_sync)** — symmetric co-movement of changes in E and M.
 
 ```
-C_sync = Pearson(ΔE_{t−W:t}, ΔM_{t−W:t})
+C_sync = Pearson( ΔE_{t−W:t}, ΔM_{t−W:t} )
 ```
 
-Named *synchrony*, not feedback: this metric is symmetric. It measures whether expressive and material changes co-move, not which is driving which. Positive synchrony = expansion co-movement. Negative synchrony = contraction co-movement. Directional coupling is a v3 direction.
+Named *synchrony*, not feedback: this metric is symmetric. It measures whether expressive and material changes co-move, not which is driving which. Positive synchrony reads as expansion-direction co-movement; negative synchrony reads as contraction-direction co-movement. Directional coupling is a v3 direction.
 
 **(c) Lag (C_lag)** — confidence-weighted phase offset.
 
 ```
-bestTau, bestR = argmax_τ Pearson(E_{t−τ}, M_t)  for τ ∈ [−τ_max, τ_max]
+bestTau, bestR = argmax_τ Pearson( E_{t−τ}, M_t )   for τ ∈ [−τ_max, τ_max]
 C_lag          = (|bestTau| / τ_max) · max(0, bestR)
 ```
 
 C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakly corroborated, non-zero only when a phase offset is both large and well-supported. Lag sign is preserved separately (negative = E leads, positive = M leads) and encoded visually as ring colour.
+
+### Instability
+
+```
+I = clip( (1 − C_align) + (1 − |C_sync|) + C_lag, 0, 1 ) / 3
+```
+
+Instability is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime alongside expansion and contraction — it is a condition of the assemblage, a measure of how decoupled the components have become.
+
+### Three attractors
+
+Regime is assigned by proximity to named attractors in **(C_align, C_sync)** space:
+
+| Attractor | C_align | C_sync | Reading |
+|-----------|---------|--------|---------|
+| Expansion | 0.75 | +0.55 | E and M aligned and co-moving in the expansion direction |
+| Contraction | 0.75 | −0.55 | E and M aligned and co-moving in the contraction direction |
+| Instability | 0.25 | 0.00 | E and M decoupled — neither aligned nor co-moving |
+
+The label is assigned to the nearest attractor. Visual position in coupling space and computed regime label speak the same language — both are continuous-space readings, not threshold conditions.
 
 ### Ψ — rendering instrument
 
@@ -107,81 +137,61 @@ C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakl
 Ψ = 0.5·C_align + 0.35·max(0, C_sync) − 0.15·C_lag
 ```
 
-Ψ is a rendering parameter, not a descriptive summary. It drives the spatial displacement of attention and market blobs on the map. The primary state representation is the position vector **(C_align, C_sync, C_lag, I)**. Ψ is not displayed in panels.
-
-### Instability
-
-```
-I = clip((1 − C_align) + (1 − |C_sync|) + C_lag, 0, 1) / 3
-```
-
-Instability (formerly "stag") is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime — it is a condition of the assemblage, present in any regime to varying degrees.
-
-### Regime
-
-Regime is assigned by proximity to named attractors in **(C_align, C_sync)** space:
-
-| Attractor | C_align | C_sync | Reading |
-|-----------|---------|--------|---------|
-| Expansion | 0.75 | +0.55 | Fields reinforcing — high alignment, positive co-movement |
-| Contraction | 0.75 | −0.55 | Fields contracting — high alignment, negative co-movement |
-| Instability | 0.25 | 0.00 | Fields decoupled — low alignment, weak synchrony |
-
-The label is assigned to the nearest attractor. Visual position in coupling space and computed regime label speak the same language — both are continuous-space readings, not threshold conditions.
+Ψ is a rendering parameter, not a descriptive summary. It drives the spatial displacement of expressive and material blooms on the map. The primary state representation is the position vector **(C_align, C_sync, C_lag, I)**. Ψ is not displayed in panels.
 
 ---
 
-## Visual grammar — Three complementary scales
+## Visual grammar — three complementary layers
 
-### Geographic layer (map)
+Three layers, each operating at a different scale of the assemblage:
 
-**Attention bloom** — warm amber, radial gradient. Radius encodes A intensity. Outer ring encodes C_lag magnitude; ring colour encodes lag direction (amber = E leading, blue = M leading).
+### 1. Geographic layer (map)
 
-**Market rectangle** — cool blue, rounded rectangle. Size encodes M_z magnitude.
+Spatial expression of the per-region assemblage components in real-world geography.
 
-**Narrative arrows** — purple, directional. Direction encodes propagation direction; number and length encode volume and velocity.
+- **Attention bloom** — warm amber radial gradient. Radius encodes A intensity. Outer ring encodes C_lag magnitude; ring colour encodes lag direction (amber = E leads, blue = M leads).
+- **Market rectangle** — cool blue rounded rectangle. Size encodes M_z magnitude.
+- **Narrative arrows** — purple, directional. Direction encodes propagation direction; number and length encode volume and velocity.
+- **A↔M offset** — dashed line between bloom and rectangle. Presence and dash pattern encode decoupling.
+- **Instability ring** — amber dashed ring around the region. Appears when I > 0.45.
+- **Expressive divergence halo** — subtle dashed halo on attention bloom. Appears when internal expressive components (A, N, ΔN) diverge significantly.
 
-**A↔M offset** — dashed line between bloom and rectangle. Presence and dash pattern encode decoupling.
+### 2. Relational layer (ternary attractor plot)
 
-**Instability ring** — amber dashed ring around the region. Appears when I > 0.45.
+A small ternary plot inset in the bottom-right of the map shows all three regions in **coupling space**. Three vertices, three attractors:
 
-**Expressive divergence halo** — subtle dashed halo on attention bloom. Appears when internal expressive components (A, N, ΔN) diverge significantly.
+- **Top vertex** — expansion
+- **Bottom-right vertex** — contraction
+- **Bottom-left vertex** — instability
 
-### Relational layer (quadrant inset)
+Each region is plotted by its **proximity to the three attractors**, computed as inverse-square distance weights from its actual (C_align, C_sync) position to each attractor coordinate. Position in the triangle reads directly as attractor proximity.
 
-**Quadrant inset** — 140×140px canvas positioned in bottom-right of map. Shows all three regions in **A × M signal space** (raw attention vs. market signals, not derived coupling metrics). This is the intuitive affect state space:
+**Encoding:**
+- **Position** — barycentric weight by proximity to each attractor
+- **Colour** — region identity (US, UK, India each get a distinct hue)
+- **Size** — instability magnitude I
+- **Outer ring** — C_lag magnitude with directional colour (blue = M leads, amber = E leads)
 
-- **X-axis**: Attention (left=low, right=high)
-- **Y-axis**: Market (bottom=negative/contracting, top=positive/expanding)
+**Function:** The ternary plot is the inter-regional assemblage view. Three regions clustered near one vertex = global assemblage synchronized in that regime. Three regions spread across vertices = regional fragmentation, deterritorialisation at the inter-regional scale. Region colour stays constant; position changes — so trajectories are easy to track.
 
-**Quadrant zones**:
-- **Top-left (anxiety)**: High attention + negative market
-- **Top-right (confidence)**: High attention + positive market
-- **Bottom-right (aspiration)**: Low attention + positive market
-- **Bottom-left (constraint)**: Low attention + negative market
+The geometry is the model: three attractors define a triangular coupling space, and each national assemblage occupies a position determined by its actual coupling state. There are no axes to interpret — the named vertices *are* the navigational system.
 
-**Dot encoding**:
-- **Position**: Where the region sits in attention × market space
-- **Colour**: Regime (expansion=green, contraction=red, instability=brown)
-- **Size + outer ring**: Instability magnitude I
+### 3. Analytical layer (per-region panels)
 
-**Function**: The quadrant is a compact relational view showing how all three regions move together through affect space in real-time. It mirrors the granular metrics in the analytical panels below, but at a glance. When regions cluster, the assemblage is coupled. When they spread, deterritorialisation is occurring.
+A three-column grid of per-region panels below the map. Each panel displays:
 
-### Analytical layer (per-region panels)
+- **Coupling metrics** — C_align, C_sync (bars with neutral geometry, no regime colour bleed)
+- **Lead-lag** — C_lag with confidence weighting
+- **Instability** — I magnitude
+- **Narrative velocity** — N and ΔN
+- **Sparklines** — A, M, N history (rolling window)
+- **Cluster composition** — display only, not yet coupled (v3 direction)
 
-**Per-region panels** — three-column grid below map. Each panel displays:
-- **Coupling metrics**: C_align, C_sync (bars with neutral geometry, no regime colour)
-- **Lead-lag**: C_lag with confidence weighting
-- **Instability**: I magnitude
-- **Narrative velocity**: N and ΔN
-- **Sparklines**: A, M, N history (28 steps)
-- **Cluster composition**: Display only, not yet coupled (v3 direction)
-
-Panels provide the analytical depth; the quadrant provides the relational simultaneity.
+Panels provide analytical depth per region; the ternary plot provides relational simultaneity across regions; the map provides geographic and signal expression. No layer duplicates another — each does specific work.
 
 ### Controls
 
-**Regime tilt strip** — horizontal gradient (expansion→instability→contraction). Cursor driven by mean C_sync across regions, encoding global synchrony state.
+**Regime tilt strip** — horizontal gradient (expansion → instability → contraction). Cursor driven by mean C_sync across regions, encoding global synchrony state.
 
 ---
 
@@ -193,7 +203,7 @@ Panels provide the analytical depth; the quadrant provides the relational simult
 | Attention (A) | Wikimedia Pageviews API | Backend — 4 cluster × 3 region terms | Live |
 | Narrative (N) | GDELT TimelineTone | Backend — per-region tone scalar | Live |
 
-Live status indicated by A● M● N● badge in the header. When a source is unavailable the corresponding signal falls back to the synthetic model.
+Live status indicated by A● M● N● badge in the header. When a source is unavailable, the corresponding signal falls back to the synthetic model.
 
 **Backend:** GitHub Actions workflow in `Super-futures/animal-spirits-api`. Runs on a schedule, computes and normalises all three axes, and writes `data/state.json` to the repo. The API repo has GitHub Pages enabled, serving `state.json` at `https://super-futures.github.io/animal-spirits-api/data/state.json` with permissive CORS headers. The frontend makes a single cache-busted fetch to this URL — all signal processing happens in the workflow.
 
@@ -201,17 +211,21 @@ Live status indicated by A● M● N● badge in the header. When a source is un
 
 ## Known limitations and v3 directions
 
-**Scalar attention (current):** A enters E as a scalar (RMS of four clusters). The compositional structure of the affect field does not enter coupling computation. Expressive divergence (expr. div.) partially exposes this tension.
+**Scalar attention (current):** A enters E as a scalar (RMS of four cluster terms). The compositional structure of the affect field does not enter coupling computation. Expressive divergence partially exposes this tension.
 
-**v3 direction — vectorised attention:** A enters E as a 2D vector (valence × accumulation), with the four clusters as named quadrants. Each cluster carries its own coupling signature to the market field. Requires Google Trends Alpha or a richer sentiment pipeline via institutional credentials.
+**v3 — vectorised attention:** A enters E as a 2D vector (valence × accumulation), with the four clusters as named quadrants. Each cluster carries its own coupling signature to the material field. Requires Google Trends Alpha or a richer sentiment pipeline via institutional credentials.
 
 **Symmetric synchrony (current):** C_sync is symmetric co-movement. It does not distinguish which field is driving which.
 
-**v3 direction — directional coupling:** Granger causality or lagged regression over longer windows.
+**v3 — directional coupling:** Granger causality or lagged regression over longer windows.
 
-**Scalar E (current):** Distinct expressive configurations can produce identical E values. Expressive divergence (expr. div.) partially exposes this.
+**Scalar E (current):** Distinct expressive configurations can produce identical E values. Expressive divergence partially exposes this.
 
-**v3 direction — vectorised E:** E as a 2D or 3D vector preserving internal structure through to coupling computation. Regime dynamics become cluster-aware.
+**v3 — vectorised E:** E as a 2D or 3D vector preserving internal structure through to coupling computation. Regime dynamics become cluster-aware.
+
+**Static attractor coordinates (current):** Attractor positions are configured constants. They do not adapt to regional variation in baseline coupling.
+
+**v3 — region-specific attractors:** Each region's attractor positions calibrated from its own historical distribution.
 
 ---
 
@@ -232,8 +246,9 @@ Live status indicated by A● M● N● badge in the header. When a source is un
 | v1.0 | Signal processing layer, regime dynamics, global headline |
 | v1.1 | Legibility pass — posture vocabulary, axis key, tightened panels |
 | v2.0 | Coupling-based architecture — expressive/material separation, C_align/C_sync/C_lag, attractor-space regime, six-layer clean separation |
-| v2.1 | Quadrant inset restored — relational layer showing all three regions in A × M signal space; visual hierarchy clarified (geographic × relational × analytical) |
+| v2.1 | Quadrant inset restored as relational layer between map and panels |
+| v2.2 | Ternary attractor plot replaces cartesian quadrant — barycentric region positioning, region-identity dot colours, geometry directly expresses the three-attractor regime model |
 
 ---
 
-*Superfutures · v2.1*
+*Superfutures · v2.2*
