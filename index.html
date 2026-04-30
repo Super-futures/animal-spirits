@@ -162,7 +162,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 <div class="map-wrap">
   <svg id="as-map" viewBox="0 0 960 480" style="width:100%;display:block"></svg>
   <canvas id="ov"></canvas>
-  <canvas id="quad-inset" style="position:absolute;bottom:8px;right:8px;border:0.5px solid var(--border2);border-radius:3px;background:var(--surface)"></canvas>
+  <canvas id="quad-inset" style="position:absolute;bottom:8px;right:8px">></canvas>
   <div class="map-lbox">
     <div class="lbt">field key</div>
     <div class="lr"><svg width="22" height="10" style="flex-shrink:0"><circle cx="6" cy="5" r="5" fill="var(--c-A)" opacity="0.15"/><circle cx="6" cy="5" r="2.5" fill="var(--c-A)" opacity="0.85"/></svg><div class="ll">attention — warm · diffuse</div></div>
@@ -200,9 +200,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 // Layer 1 accessors only; processing and rendering are untouched.
 // ═══════════════════════════════════════════════════════════════════════
 const REGIONS = [
-  {id:'us',    label:'United States',   short:'US', lng:-98,  lat:38,   color:'#3860A0'},
+  {id:'us',    label:'United States',  short:'US', lng:-98,  lat:38,   color:'#3860A0'},
   {id:'uk',    label:'United Kingdom', short:'UK', lng:-1.5, lat:52.5, color:'#7040A8'},
-  {id:'india', label:'India',          short:'IN', lng:78.9, lat:20.6, color:'#A05030'},
+  {id:'india', label:'India',          short:'IN', lng:78.9, lat:20.6, color:'#0D8B8B'},
 ];
 const CLUSTERS = [
   {id:'anxiety',    label:'anxiety',    color:'#B84040'},
@@ -543,13 +543,12 @@ function getCoords(){
   });
 }
 
-// ── Quadrant inset (A × M coupling phase space)
+// ── Attractor ternary plot (barycentric coupling space)
 function drawQuadrant(){
   const cv=document.getElementById('quad-inset');
   if(!cv) return;
   
-  const size=140, pad=8, center=size/2;
-  cv.width=size; cv.height=size;
+  const size=235;
   cv.style.width=size+'px'; cv.style.height=size+'px';
   
   const ctx=cv.getContext('2d');
@@ -557,83 +556,139 @@ function drawQuadrant(){
   cv.width=size*dpr; cv.height=size*dpr;
   ctx.scale(dpr,dpr);
   
-  // Background — stronger contrast
-  ctx.fillStyle=isDark?'rgba(20,20,20,0.95)':'rgba(255,255,255,0.98)';
-  ctx.fillRect(0,0,size,size);
+  // Transparent background — no canvas frame
+  ctx.clearRect(0,0,size,size);
   
-  // Crosshairs (A=0, M=0 center)
-  ctx.strokeStyle=isDark?'rgba(120,120,120,0.5)':'rgba(100,100,100,0.4)';
-  ctx.lineWidth=0.5;
-  ctx.setLineDash([1.5,2]);
-  ctx.beginPath(); ctx.moveTo(center,pad); ctx.lineTo(center,size-pad);
-  ctx.beginPath(); ctx.moveTo(pad,center); ctx.lineTo(size-pad,center);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  // Equilateral triangle with margins for labels on all sides
+  // Top: 'expansion' label above
+  // Bottom-left: 'instability' label below (full word fits)
+  // Bottom-right: 'contraction' label below (full word fits)
+  const topMargin = 14;     // space above for 'expansion' label
+  const bottomMargin = 22;  // space below for 'instability'/'contraction' labels
+  const sideMargin = 28;    // space on sides so labels don't truncate
   
-  // Quadrant labels (affect states in A × M space)
-  const lbl=(text,x,y)=>{
-    ctx.font='8px -apple-system,sans-serif';
-    ctx.fillStyle=isDark?'rgba(200,200,200,0.4)':'rgba(0,0,0,0.25)';
-    ctx.textAlign=x<center?'left':'right';
-    ctx.textBaseline=y<center?'top':'bottom';
-    ctx.fillText(text,x,y);
+  const cx = size / 2;
+  const triHeight = size - topMargin - bottomMargin;
+  const triWidth = size - sideMargin * 2;
+  
+  // Equilateral triangle: height = (sqrt(3)/2) * width
+  // Use the smaller constraint
+  const idealHeight = (Math.sqrt(3) / 2) * triWidth;
+  const actualHeight = Math.min(triHeight, idealHeight);
+  const actualWidth = (2 / Math.sqrt(3)) * actualHeight;
+  
+  // Pin triangle to bottom (so labels are at fixed distance from canvas edge)
+  const triBottom = size - bottomMargin;
+  const triTop = triBottom - actualHeight;
+  
+  const vertices = {
+    expansion:   { x: cx,                          y: triTop,    color: C_EXP,  name: 'expansion'   },
+    contraction: { x: cx + actualWidth / 2,        y: triBottom, color: C_CON,  name: 'contraction' },
+    instability: { x: cx - actualWidth / 2,        y: triBottom, color: C_STAG, name: 'instability' }
   };
-  lbl('anxiety',pad+3,pad+3);
-  lbl('aspiration',size-pad-3,pad+3);
-  lbl('constraint',pad+3,size-pad-3);
-  lbl('confidence',size-pad-3,size-pad-3);
   
-  // Axis labels
-  ctx.font='7px -apple-system,sans-serif';
-  ctx.fillStyle=isDark?'rgba(200,200,200,0.6)':'rgba(0,0,0,0.5)';
-  ctx.textAlign='center'; ctx.textBaseline='bottom';
-  ctx.fillText('attention',center,size-2);
-  ctx.textAlign='right'; ctx.textBaseline='middle';
-  ctx.fillText('market',size-2,center);
-  
-  // Get all states and plot
-  const states=getAllStates();
-  const scale=(size-pad*2)/2;
-  
-  // Plot region dots
-  states.forEach((st,i)=>{
-    const rg=REGIONS[i];
-    // A is [0,1], map to screen x (0→left, 1→right)
-    // M is [-1,1], map to screen y (negative→bottom, positive→top)
-    const x=center+st.A_z*scale;  // A_z is z-scored normalized attention
-    const y=center-st.M_z*scale;  // M_z is z-scored normalized market
-    
-    // Clamp to quadrant bounds
-    const cx=Math.max(pad+2, Math.min(size-pad-2, x));
-    const cy=Math.max(pad+2, Math.min(size-pad-2, y));
-    
-    // Dot radius proportional to instability, minimum 4px
-    const r=Math.max(4,4+st.I*6);
-    
-    // Dot color = regime (expansion green, contraction red, instability brown)
-    ctx.fillStyle=st.regimeColor+'ee';
-    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  // Soft attractor basins at vertices (subtle, atmospheric)
+  const basinR = actualHeight * 0.4;
+  Object.values(vertices).forEach(v => {
+    const grad = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, basinR);
+    grad.addColorStop(0, v.color + '24');
+    grad.addColorStop(1, v.color + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(v.x, v.y, basinR, 0, Math.PI*2);
     ctx.fill();
-    
-    // Outer ring = instability magnitude
-    if(st.I>0.3){
-      ctx.strokeStyle=C_STAG+Math.round((st.I-0.3)*150).toString(16).padStart(2,'0');
-      ctx.lineWidth=0.8;
-      ctx.beginPath(); ctx.arc(cx,cy,r+2,0,Math.PI*2);
-      ctx.stroke();
-    }
-    
-    // Region label (white or black for contrast)
-    ctx.font='700 8px -apple-system,sans-serif';
-    ctx.fillStyle=isDark?'#000':'#fff';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(rg.short,cx,cy);
   });
   
-  // Border — stronger
-  ctx.strokeStyle=isDark?'rgba(100,100,100,0.5)':'rgba(0,0,0,0.25)';
-  ctx.lineWidth=0.75;
-  ctx.strokeRect(pad,pad,size-pad*2,size-pad*2);
+  // Triangle edges
+  ctx.strokeStyle = isDark ? 'rgba(180,180,180,0.28)' : 'rgba(0,0,0,0.22)';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(vertices.expansion.x,   vertices.expansion.y);
+  ctx.lineTo(vertices.contraction.x, vertices.contraction.y);
+  ctx.lineTo(vertices.instability.x, vertices.instability.y);
+  ctx.closePath();
+  ctx.stroke();
+  
+  // Vertex marker dots
+  Object.values(vertices).forEach(v => {
+    ctx.fillStyle = v.color + 'cc';
+    ctx.beginPath();
+    ctx.arc(v.x, v.y, 2.8, 0, Math.PI*2);
+    ctx.fill();
+  });
+  
+  // Attractor labels — sized and positioned so they never truncate
+  ctx.font = '9px -apple-system,sans-serif';
+  ctx.fillStyle = isDark ? 'rgba(220,220,220,0.78)' : 'rgba(0,0,0,0.65)';
+  
+  // expansion (top, centred above vertex)
+  ctx.textAlign='center';
+  ctx.textBaseline='bottom';
+  ctx.fillText('expansion', vertices.expansion.x, vertices.expansion.y - 6);
+  
+  // contraction (bottom-right, below vertex, right-aligned to keep on canvas)
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+  ctx.fillText('contraction', vertices.contraction.x, vertices.contraction.y + 6);
+  
+  // instability (bottom-left, below vertex, left-aligned to keep on canvas)
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+  ctx.fillText('instability', vertices.instability.x, vertices.instability.y + 6);
+  
+  // Compute barycentric position for each region
+  const attractorCoords = {
+    expansion:   { align: 0.75, sync: +0.55 },
+    contraction: { align: 0.75, sync: -0.55 },
+    instability: { align: 0.25, sync:  0.00 }
+  };
+  
+  const states = getAllStates();
+  
+  states.forEach((st,i)=>{
+    const rg = REGIONS[i];
+    
+    const dExp = Math.hypot(st.C_align - attractorCoords.expansion.align,   st.C_sync - attractorCoords.expansion.sync);
+    const dCon = Math.hypot(st.C_align - attractorCoords.contraction.align, st.C_sync - attractorCoords.contraction.sync);
+    const dIns = Math.hypot(st.C_align - attractorCoords.instability.align, st.C_sync - attractorCoords.instability.sync);
+    
+    const eps = 0.05;
+    const wExp = 1 / ((dExp + eps) * (dExp + eps));
+    const wCon = 1 / ((dCon + eps) * (dCon + eps));
+    const wIns = 1 / ((dIns + eps) * (dIns + eps));
+    const wSum = wExp + wCon + wIns;
+    
+    const bExp = wExp / wSum;
+    const bCon = wCon / wSum;
+    const bIns = wIns / wSum;
+    
+    const px = bExp * vertices.expansion.x   + bCon * vertices.contraction.x   + bIns * vertices.instability.x;
+    const py = bExp * vertices.expansion.y   + bCon * vertices.contraction.y   + bIns * vertices.instability.y;
+    
+    // Dot radius proportional to instability
+    const dotR = Math.max(6, 6 + st.I * 6);
+    
+    // Dot color = REGION IDENTITY
+    ctx.fillStyle = rg.color + 'ee';
+    ctx.beginPath(); ctx.arc(px, py, dotR, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Outer ring = C_lag magnitude
+    if(st.C_lag > 0.15){
+      ctx.strokeStyle = st.C_lag_sign > 0 ? '#3860A0' : '#C87820';
+      ctx.globalAlpha = 0.6 * st.C_lag;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(px, py, dotR + 2.5, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    
+    // Region label inside dot
+    ctx.font = '700 9px -apple-system,sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(rg.short, px, py);
+  });
 }
 
 function draw(){
