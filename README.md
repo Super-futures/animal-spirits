@@ -6,7 +6,7 @@
 
 ## What it is
 
-Animal Spirits observes the expressive and material dimensions of collective economic life across three regions simultaneously — US/Europe, UK, and India. It does not predict markets. It does not aggregate sentiment scores. It reads the **coupling** between distributed addressed expression and realised economic behaviour, and surfaces the regime that emerges from that coupling.
+Animal Spirits observes the expressive and material dimensions of collective economic life across three regions simultaneously — US, UK, and India. It does not predict markets. It does not aggregate sentiment scores. It reads the **coupling** between distributed addressed expression and realised economic behaviour, and surfaces the regime that emerges from that coupling.
 
 The project takes seriously Keynes' choice of the word *animal* in "animal spirits." Not *human* spirits — *animal*: the animate substrate of collective life, prior to and underneath the specific configurations that get called rational or irrational. Markets are not contaminated by affect; they are constituted through it. Animal Spirits makes that constitutive process visible.
 
@@ -20,11 +20,11 @@ The model draws on four intellectual lineages, each doing specific work that the
 
 **Bakhtin** — all utterance is addressed. The dialogic structure of language anticipates and is shaped by the response of an other, and this structure is operative whether or not a co-present interlocutor exists. News cycles, market commentary, financial media, and social platforms instantiate addressed expression at scale: every story is shaped by an imagined reception, every price signal is read against anticipated response. Collective economic affect is not merely reflected in distributed expression — it is constituted through it. The other is baked into the language.
 
-**Collins (2004)** — interaction ritual chain theory specifies the mechanism by which emotional energy is produced in successful communicative encounters, accumulated through ritual chains, and discharged into action. Markets are ritual chains at scale: attention, narrative, and market behaviour form a chain through which affect is deposited, held, and discharged. Stag is collective failed ritual — high expressive activity, no integration, no accumulation. The spring does not load.
+**Collins (2004)** — interaction ritual chain theory specifies the mechanism by which emotional energy is produced in successful communicative encounters, accumulated through ritual chains, and discharged into action. Markets are ritual chains at scale: attention, narrative, and market behaviour form a chain through which affect is deposited, held, and discharged. Instability (formerly "stag") is collective failed ritual — high expressive activity, no integration, no accumulation. The spring does not load.
 
 **DeLanda (2016)** — assemblage theory. Every human assemblage has material and expressive components. Neither reduces to the other; relations between assemblages are external, not internal. The economic affect-narrative-market system is a cybernetic assemblage: expressive components (attention, narrative) coupled to material components (market behaviour), with regime states as emergent attractors and phase transitions as deterritorialisation events. No scale is privileged — individuals and collectives are equally real assemblages constituted through the same mechanism at different resolutions.
 
-Together these lineages support a single claim: **collective economic affect is constituted through distributed addressed expression, and the conditions of that constitution are readable from the expressive and material infrastructure that produces it.** Contagion is not transmission — it is constitutive cascade, the dialogic field reorganising. Stag is not a third regime alongside bull and bear — it is the condition in which the constitutive process is active but failing to integrate.
+Together these lineages support a single claim: **collective economic affect is constituted through distributed addressed expression, and the conditions of that constitution are readable from the expressive and material infrastructure that produces it.** Contagion is not transmission — it is constitutive cascade, the dialogic field reorganising. Instability is not a third regime alongside expansion and contraction — it is the condition in which the constitutive process is active but failing to integrate.
 
 ---
 
@@ -37,7 +37,7 @@ Layer 0 — Configuration      (constants, weights, attractor centres)
 Layer 1 — Signal Acquisition  (raw signal accessors — swappable)
 Layer 2 — Signal Processing   (RegionProcessor — all coupling computation)
 Layer 3 — Synthesis           (state cache, synthetic fallback)
-Layer 4 — Rendering           (map, coupling planes, panels — reads state only)
+Layer 4 — Rendering           (map, quadrant inset, panels — reads state only)
 Layer 5 — Data Acquisition    (single fetch — state.json via GitHub Pages)
 Layer 6 — Initialisation      (boot, tick, resize)
 ```
@@ -99,7 +99,7 @@ bestTau, bestR = argmax_τ Pearson(E_{t−τ}, M_t)  for τ ∈ [−τ_max, τ_m
 C_lag          = (|bestTau| / τ_max) · max(0, bestR)
 ```
 
-C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakly corroborated, non-zero only when a phase offset is both large and well-supported. Lag sign is preserved separately (negative = E leads, positive = M leads) and encoded visually as ring colour on the coupling planes.
+C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakly corroborated, non-zero only when a phase offset is both large and well-supported. Lag sign is preserved separately (negative = E leads, positive = M leads) and encoded visually as ring colour.
 
 ### Ψ — rendering instrument
 
@@ -115,7 +115,7 @@ C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakl
 I = clip((1 − C_align) + (1 − |C_sync|) + C_lag, 0, 1) / 3
 ```
 
-Instability is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime — it is a condition of the assemblage, present in any regime to varying degrees.
+Instability (formerly "stag") is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime — it is a condition of the assemblage, present in any regime to varying degrees.
 
 ### Regime
 
@@ -131,9 +131,11 @@ The label is assigned to the nearest attractor. Visual position in coupling spac
 
 ---
 
-## Visual grammar
+## Visual grammar — Three complementary scales
 
-**Attention bloom** — warm amber, radial gradient. Radius encodes intensity. Outer ring encodes C_lag magnitude; ring colour encodes lag direction (amber = E leading, blue = M leading).
+### Geographic layer (map)
+
+**Attention bloom** — warm amber, radial gradient. Radius encodes A intensity. Outer ring encodes C_lag magnitude; ring colour encodes lag direction (amber = E leading, blue = M leading).
 
 **Market rectangle** — cool blue, rounded rectangle. Size encodes M_z magnitude.
 
@@ -145,9 +147,41 @@ The label is assigned to the nearest attractor. Visual position in coupling spac
 
 **Expressive divergence halo** — subtle dashed halo on attention bloom. Appears when internal expressive components (A, N, ΔN) diverge significantly.
 
-**Coupling plane** — 2D canvas showing position in (C_align × C_sync) space. Ring around each dot encodes C_lag. Three named attractor regions softly shaded. Inset on map (all regions) and per-region below panels.
+### Relational layer (quadrant inset)
 
-**Regime tilt strip** — horizontal gradient in controls. Cursor driven by mean C_sync across regions.
+**Quadrant inset** — 140×140px canvas positioned in bottom-right of map. Shows all three regions in **A × M signal space** (raw attention vs. market signals, not derived coupling metrics). This is the intuitive affect state space:
+
+- **X-axis**: Attention (left=low, right=high)
+- **Y-axis**: Market (bottom=negative/contracting, top=positive/expanding)
+
+**Quadrant zones**:
+- **Top-left (anxiety)**: High attention + negative market
+- **Top-right (confidence)**: High attention + positive market
+- **Bottom-right (aspiration)**: Low attention + positive market
+- **Bottom-left (constraint)**: Low attention + negative market
+
+**Dot encoding**:
+- **Position**: Where the region sits in attention × market space
+- **Colour**: Regime (expansion=green, contraction=red, instability=brown)
+- **Size + outer ring**: Instability magnitude I
+
+**Function**: The quadrant is a compact relational view showing how all three regions move together through affect space in real-time. It mirrors the granular metrics in the analytical panels below, but at a glance. When regions cluster, the assemblage is coupled. When they spread, deterritorialisation is occurring.
+
+### Analytical layer (per-region panels)
+
+**Per-region panels** — three-column grid below map. Each panel displays:
+- **Coupling metrics**: C_align, C_sync (bars with neutral geometry, no regime colour)
+- **Lead-lag**: C_lag with confidence weighting
+- **Instability**: I magnitude
+- **Narrative velocity**: N and ΔN
+- **Sparklines**: A, M, N history (28 steps)
+- **Cluster composition**: Display only, not yet coupled (v3 direction)
+
+Panels provide the analytical depth; the quadrant provides the relational simultaneity.
+
+### Controls
+
+**Regime tilt strip** — horizontal gradient (expansion→instability→contraction). Cursor driven by mean C_sync across regions, encoding global synchrony state.
 
 ---
 
@@ -198,7 +232,8 @@ Live status indicated by A● M● N● badge in the header. When a source is un
 | v1.0 | Signal processing layer, regime dynamics, global headline |
 | v1.1 | Legibility pass — posture vocabulary, axis key, tightened panels |
 | v2.0 | Coupling-based architecture — expressive/material separation, C_align/C_sync/C_lag, attractor-space regime, six-layer clean separation |
+| v2.1 | Quadrant inset restored — relational layer showing all three regions in A × M signal space; visual hierarchy clarified (geographic × relational × analytical) |
 
 ---
 
-*Superfutures · v2.0*
+*Superfutures · v2.1*
