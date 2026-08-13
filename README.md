@@ -1,219 +1,285 @@
-# animal-spirits-api
+# Animal Spirits
 
-*Backend data pipeline for [Animal Spirits](https://propensities.github.io/animal-spirits/) — fetching, normalising, and composing collective economic affect signals across three regions.*
-
----
-
-## What it does
-
-A scheduled GitHub Actions workflow fetches three signals — attention, market, and narrative — for the US, UK, and India, normalises each to a signed scalar, and writes `data/state.json` and `data/history.jsonl`. Both are served via GitHub Pages.
-
-The backend produces **normalised per-axis scalars only**. All coupling metrics (alignment, synchrony, lag, instability) and regime classification are computed in the frontend's signal processing layer.
-
-There is no server. Each run is a one-shot process that produces a static artefact.
+*A real-time interface for reading the constitutive dynamics of collective economic affect.*
 
 ---
 
-## Output
+## What it is
 
-### `data/state.json`
+Animal Spirits observes the expressive and material dimensions of collective economic life across three regions simultaneously — US, UK, and India. It does not predict markets. It does not aggregate sentiment scores. It reads the **coupling** between distributed addressed expression and realised economic behaviour, and surfaces the regime that emerges from that coupling.
 
-Overwritten every run. Latest snapshot of all three regions:
-
-```json
-{
-  "timestamp": "2026-08-13T05:57:27.973392+00:00",
-  "regions": {
-    "us":    { "attention": 0.797, "market": 0.111, "narrative": -0.060 },
-    "uk":    { "attention": -0.320, "market": 0.067, "narrative": null },
-    "india": { "attention": 0.987, "market": 0.059, "narrative": -0.374 }
-  },
-  "meta": {
-    "attention": "live",
-    "market": "live",
-    "narrative": "live"
-  }
-}
-```
-
-All values are signed, roughly in `(-1, +1)`. A per-axis value may be `null` when that region's fetch failed. Narrative is negative under stress, positive under relief.
-
-**`meta` reports status per axis, not per region.** An axis is marked `live` if *at least one* region returned data. In the example above, `narrative` reads `live` while the UK value is `null`. Consumers wanting per-region provenance must check for `null` directly.
-
-### `data/history.jsonl`
-
-Appended every run — one line per region, three lines per refresh. Pruned to a 90-day rolling window at the end of each run.
-
-```json
-{"timestamp": "...", "region": "us", "A": 0.797, "M": 0.111, "N": -0.060}
-```
-
-### `data/cache.json`
-
-TTL-keyed cache, committed alongside the state files so that rolling baselines and API responses survive between one-shot runs. Not a data output; it is infrastructure.
+The project takes seriously Keynes' choice of the word *animal* in "animal spirits." Not *human* spirits — *animal*: the animate substrate of collective life, prior to and underneath the specific configurations that get called rational or irrational. Markets are not contaminated by affect; they are constituted through it. Animal Spirits makes that constitutive process visible.
 
 ---
 
-## Sources
+## Theoretical grounding
 
-### Attention — Wikimedia Pageviews API
+The model draws on four intellectual lineages, each doing specific work that the others cannot:
 
-`en.wikipedia`, all-access, all-agents, daily granularity.
+**Keynes (1936)** — named the affective substrate of economic decision-making as an irreducible constitutive condition, not a residual error. In the *General Theory*, animal spirits are "a spontaneous urge to action rather than inaction" — not the irrational residual in otherwise rational markets, but the condition that makes action under genuine uncertainty possible at all. Without them, expected-utility calculation under radical uncertainty cannot generate decision. The animal spirits are what markets run on, not what contaminates them.
 
-**32 articles per region** — 8 terms across each of 4 affect clusters (anxiety, confidence, aspiration, constraint); 96 articles in total.
+**Bakhtin** — all utterance is addressed. The dialogic structure of language anticipates and is shaped by the response of an other, and this structure is operative whether or not a co-present interlocutor exists. News cycles, market commentary, financial media, and social platforms instantiate addressed expression at scale: every story is shaped by an imagined reception, every price signal is read against anticipated response. Collective economic affect is not merely reflected in distributed expression — it is constituted through it. The other is baked into the language.
 
-Each article's most recent complete day is z-scored against its own preceding ~30-day series (window ends at yesterday, since the current day is incomplete). A cluster value is the mean z-score across its available terms. The regional composite is the mean of weighted cluster z-scores:
+**Collins (2004)** — interaction ritual chain theory specifies the mechanism by which emotional energy is produced in successful communicative encounters, accumulated through ritual chains, and discharged into action. Markets are ritual chains at scale: attention, narrative, and market behaviour form a chain through which affect is deposited, held, and discharged. Instability is collective failed ritual — high expressive activity, no integration, no accumulation. The spring does not load.
 
-```
-anxiety     -1.0
-confidence  +1.0
-aspiration  +0.5
-constraint  -0.7
+**DeLanda (2016)** — assemblage theory. Every human assemblage has material and expressive components. Neither reduces to the other; relations between assemblages are external, not internal. The economic affect-narrative-market system is a cybernetic assemblage: expressive components (attention, narrative) coupled to material components (market behaviour), with regime states as emergent attractors and phase transitions as deterritorialisation events. No scale is privileged — individuals and collectives are equally real assemblages constituted through the same mechanism at different resolutions.
 
-composite = Σ(weight × cluster_z) / n_clusters_available
-A         = tanh(composite / 1.5)
-```
-
-Positive = expansion-coded attention. Negative = stress-coded attention.
-
-Z-scoring against each term's own history yields *unusual attention relative to that term's baseline* rather than absolute volume — background popularity is factored out, curiosity spikes are retained.
-
-Cache TTL: 30 minutes.
-
-### Market — Alpha Vantage ETF proxies + FRED macro stress
-
-```
-composite = 0.55 × local_equity + 0.45 × global_stress
-```
-
-**Local equity** uses index-tracking ETFs rather than the indices themselves, because Alpha Vantage's free tier covers equities but not index endpoints:
-
-| Region | Symbol | Tracks |
-|---|---|---|
-| US | `SPY` | S&P 500 |
-| UK | `ISF.LON` | FTSE 100 |
-| India | `NIFTYBEES.BSE` | Nifty 50 |
-
-`TIME_SERIES_DAILY`, compact. The scalar compares the mean of the last 5 daily returns against the standard deviation of the prior returns in the series, squashed via `tanh(ratio / 2.0)`.
-
-**Global stress** is drawn from FRED:
-
-| Series | Description |
-|---|---|
-| `VIXCLS` | CBOE volatility index |
-| `BAMLH0A0HYM2` | ICE BofA US high-yield option-adjusted spread |
-| `DTWEXBGS` | Trade-weighted US dollar index (broad) |
-
-```
-stress = tanh((-0.40·z(vix) − 0.40·z(credit) − 0.20·|z(dollar)|) / 1.5)
-```
-
-**This backdrop is global and is applied identically to all three regions.** See *Limitations* below.
-
-Cache TTL: 6 hours (equity), 1 hour (FRED). Alpha Vantage calls are issued serially with 12-second gaps to respect the free tier's per-minute limit; the 6-hour TTL is what keeps daily usage (~12 calls) under the 25/day cap, not the refresh cadence.
-
-### Narrative — GDELT DOC 2.0, TimelineTone
-
-One query per region, filtered by `sourcecountry` (`US`, `UK`, `IN`), over a 1-day timespan:
-
-```
-("recession" OR "unemployment" OR "inflation" OR "crisis"
- OR "layoffs" OR "bankruptcy")
-```
-
-The most recent numeric tone value in the returned timeline is taken, then:
-
-```
-N = tanh(clip(raw_tone / 5.0, -1, 1))
-```
-
-GDELT tone is used with its native sign — negative tone on these terms means narrative stress; no sign flip is applied.
-
-Cache TTL: 15 minutes. Requests are paced 6 seconds apart with up to 3 attempts and a 10-second retry delay, using a single keep-alive client — GDELT's free endpoint frequently refuses fresh TCP connections from Actions runners.
+Together these lineages support a single claim: **collective economic affect is constituted through distributed addressed expression, and the conditions of that constitution are readable from the expressive and material infrastructure that produces it.** Contagion is not transmission — it is constitutive cascade, the dialogic field reorganising. Instability is not a third regime alongside expansion and contraction — it is the condition in which the constitutive process is active but failing to integrate.
 
 ---
 
-## Limitations
+## Ontological mapping
 
-These are design constraints, documented rather than resolved.
+The three observable axes map cleanly onto DeLanda's material/expressive distinction:
 
-**The market stress backdrop is not regionally differentiated.** All three FRED series are US instruments, and the same stress scalar contributes 45% of every region's market value. Some apparent inter-regional market coupling is therefore a property of the construction rather than an observation. Regionally-specific stress instruments (e.g. RBI rates for India, gilt spreads for the UK) are a v3 direction.
+| Component | Axis | Source |
+|-----------|------|--------|
+| **Expressive** | Attention (A) — compositional | Wikimedia Pageviews (en.wikipedia) |
+| **Expressive** | Narrative (N) — dynamic, propagating | GDELT TimelineTone |
+| **Material** | Market (M) — realised behaviour | Alpha Vantage ETF proxies + FRED |
 
-**Equity failure degrades silently.** If an Alpha Vantage fetch fails for a region and FRED succeeded, that region falls back to `stress × 0.6` — a value composed entirely of US macro conditions with no local market input — and the axis still reports `live`. Nothing in the output distinguishes this from a normal reading.
+Attention and narrative together compose the **expressive field (E)** — the addressed, dialogic substrate through which collective affect circulates. Market is the **material field (M)** — the realised behavioural discharge.
 
-**Attention is English-language only.** All three regions are read from `en.wikipedia`. Wikimedia serves Hindi, Bengali, Tamil and other editions through the same API on identical terms; they are not sampled. This is a selection, not an infrastructural constraint, and it means the India attention signal reads an anglophone subset of that population. Multilingual sampling is a v3 direction.
-
-**Narrative is anxiety-conditioned by construction.** The GDELT query is restricted to economic stress terms, so N measures the tone of stress discourse rather than general economic media tone. This is deliberate — stress narratives propagate fastest and are the most reactive sub-signal — but it is not a neutral read of media sentiment.
-
-**Narrative cannot reach full scale.** The `clip → tanh` sequence bounds N at ±0.762 while attention and market can reach ±1. The three axes are not on identical scales.
-
-**Attention is a scalar collapse.** Four affect clusters are combined before writing to `state.json`. Cluster composition is not exposed, so the frontend cannot compute expressive divergence from source.
-
-**GDELT country filtering is by outlet location**, not by audience, language, or subject.
+This mapping is not metaphor. It is the operational form of the assemblage: two distinct ontological components, irreducible to each other, coupled through computable relations.
 
 ---
 
 ## Architecture
 
+The codebase is organised into six explicitly separated layers:
+
 ```
-run.py                  — orchestration: parallel fetch, compose, write, prune
-├── sources/market.py    — Alpha Vantage + FRED, composite computation
-├── sources/attention.py — Wikimedia pageviews, cluster z-score composite
-├── sources/narrative.py — GDELT TimelineTone, tone normalisation
-├── normalise.py         — shared primitives: z_score, tanh_squash, clip
-└── cache.py             — file-backed TTL cache (data/cache.json)
+Layer 0 — Configuration       (constants, weights, attractor centres)
+Layer 1 — Signal Acquisition  (raw signal accessors — swappable)
+Layer 2 — Signal Processing   (RegionProcessor — coupling computation)
+Layer 3 — Synthesis           (state cache, synthetic fallback)
+Layer 4 — Rendering           (map, ternary plot, panels — reads state only)
+Layer 5 — Data Acquisition    (single fetch — state.json via GitHub Pages)
+Layer 6 — Initialisation      (boot, tick, resize)
 ```
 
-Each source module returns `({region: scalar_or_None}, status)`. `run.py` wraps each in a 180-second timeout; a source that times out or raises returns all-`None` with status `simulated` rather than failing the run.
-
-Signal acquisition is deliberately thin and replaceable. Richer attention pipelines, directional narrative data, or higher-frequency market signals can be substituted at the source-module level without touching normalisation, the state schema, or the frontend.
+**To change data sources:** replace Layer 1 accessors only. Processing and rendering layers are untouched. This is the v3 pathway for Google Trends Alpha, richer sentiment pipelines, and vectorised attention.
 
 ---
 
-## Workflow
+## The model
 
-`.github/workflows/refresh.yml` — cron `*/15 * * * *`, plus `workflow_dispatch` and push-triggered runs when `run.py`, `sources/**`, `normalise.py`, or the workflow itself change. Concurrency-grouped, 10-minute timeout, Python 3.11.
+### The expressive field
 
-1. Fetch all three axes in parallel
-2. Compose `state.json` with timestamp and meta
-3. Append to `history.jsonl` (one line per region)
-4. Prune `history.jsonl` to the last 90 days
-5. Flush the cache
-6. Commit and push `state.json`, `cache.json`, and `history.jsonl` as `animal-spirits-bot`, with rebase-and-retry on push conflict
-
-The run exits non-zero only when *all three* axes return `simulated`, so CI status reflects genuine outages rather than partial degradation.
-
-**Observed cadence is lower than nominal.** Across 89.9 days (15 May – 13 August 2026, 1,173 refresh events) the median interval between runs was **90 minutes** — roughly 13 events per day, about 14% of the 15-minute schedule. This reflects scheduled-workflow throttling on GitHub Actions rather than source failure; no gap exceeded nine hours and the 90-day window is complete. Observed per-axis availability over the same period: attention 99.9%, market 100%, narrative **50.1%**.
-
----
-
-## Configuration
-
-Two repository secrets:
+The expressive components combine into a single field:
 
 ```
-ALPHA_VANTAGE_API_KEY
-FRED_API_KEY
+E = w_A · A_z  +  w_N · N_z  +  w_V · ΔN_z
 ```
 
-Both free tiers. See `.env.example` for local development.
+where all components are z-scored over the same rolling window W. E is a scalar — it compresses internal expressive structure. **Expressive divergence** (displayed in panels as *expr. div.*) exposes this compression:
+
+```
+expr_div = mean( |A_z − N_z|, |A_z − ΔN_z|, |N_z − ΔN_z| )
+```
+
+High expr. div. with stable E indicates an internally tense expressive field: the components are diverging even though the net field reads stable. This affects bloom diffusion on the map but does not yet enter coupling computation directly — vectorised E is a v3 direction.
+
+### Coupling metrics
+
+Three metrics characterise the relationship between the expressive field (E) and the material field (M_z):
+
+**(a) Alignment (C_align)** — magnitude-weighted proximity of E and M.
+
+```
+rawProximity = 1 − |E − M_z| / 2
+magWeight    = sigmoid( (|E| + |M_z|) · 1.5 − 1.5 )
+C_align      = rawProximity · magWeight  +  0.5 · (1 − magWeight)
+```
+
+When both signals are near zero, alignment is suppressed toward neutral (≈0.5) rather than reading as falsely well-aligned. High alignment requires both fields to be meaningfully elevated and proximate.
+
+**(b) Synchrony (C_sync)** — symmetric co-movement of changes in E and M.
+
+```
+C_sync = Pearson( ΔE_{t−W:t}, ΔM_{t−W:t} )
+```
+
+Named *synchrony*, not feedback: this metric is symmetric. It measures whether expressive and material changes co-move, not which is driving which. Positive synchrony reads as expansion-direction co-movement; negative synchrony reads as contraction-direction co-movement. Directional coupling is a v3 direction.
+
+**(c) Lag (C_lag)** — confidence-weighted phase offset.
+
+```
+bestTau, bestR = argmax_τ Pearson( E_{t−τ}, M_t )   for τ ∈ [−τ_max, τ_max]
+C_lag          = (|bestTau| / τ_max) · max(0, bestR)
+```
+
+C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakly corroborated, non-zero only when a phase offset is both large and well-supported. Lag sign is preserved separately (negative = E leads, positive = M leads) and encoded visually as ring colour.
+
+### Instability
+
+```
+I = min( 1, [ (1 − C_align) + (1 − |C_sync|) + C_lag ] / 3 )
+```
+
+Instability is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime alongside expansion and contraction — it is a condition of the assemblage, a measure of how decoupled the components have become.
+
+### Three attractors
+
+Regime is assigned by proximity to named attractors in **(C_align, C_sync)** space:
+
+| Attractor | C_align | C_sync | Reading |
+|-----------|---------|--------|---------|
+| Expansion | 0.75 | +0.55 | E and M aligned and co-moving in the expansion direction |
+| Contraction | 0.75 | −0.55 | E and M aligned and co-moving in the contraction direction |
+| Instability | 0.25 | 0.00 | E and M decoupled — neither aligned nor co-moving |
+
+The label is assigned to the nearest attractor. Visual position in coupling space and computed regime label speak the same language — both are continuous-space readings, not threshold conditions.
+
+### Ψ — rendering instrument
+
+```
+Ψ = 0.5·C_align + 0.35·max(0, C_sync) − 0.15·C_lag
+```
+
+Ψ is a rendering parameter, not a descriptive summary. It drives the spatial displacement of expressive and material blooms on the map. The primary state representation is the position vector **(C_align, C_sync, C_lag, I)**. Ψ is not displayed in panels.
 
 ---
 
-## v3 directions
+## Visual grammar — three complementary layers
 
-- **Cluster vector exposure** — write the full `{anxiety, confidence, aspiration, constraint}` vector per region so the frontend can compute expressive divergence from source rather than approximating it.
-- **Regionally-specific stress instruments** — replace the shared FRED backdrop with region-native series to make cross-region market comparability legitimate.
-- **Per-region status reporting** — extend `meta` to per-region-per-axis provenance, including whether a market value used the equity fallback.
-- **Multilingual attention** — sample `hi.wikipedia`, `bn.wikipedia`, `ta.wikipedia` alongside English for India.
-- **Narrative cluster decomposition** — separate GDELT queries per affect cluster, so narrative can be read by valence rather than aggregated under stress terms.
-- **Google Trends Alpha** — institutional API access for higher-frequency, query-specific attention.
+Three layers, each operating at a different scale of the assemblage:
+
+### 1. Geographic layer (map)
+
+Spatial expression of the per-region assemblage components in real-world geography.
+
+- **Attention bloom** — warm amber radial gradient. Radius encodes A intensity. Outer ring encodes C_lag magnitude; ring colour encodes lag direction (amber = E leads, blue = M leads).
+- **Market rectangle** — cool blue rounded rectangle. Size encodes M_z magnitude.
+- **Narrative arrows** — purple, directional. Direction encodes propagation direction; number and length encode volume and velocity.
+- **A↔M offset** — dashed line between bloom and rectangle. Presence and dash pattern encode decoupling.
+- **Instability ring** — amber dashed ring around the region. Appears when I > 0.45.
+- **Expressive divergence halo** — subtle dashed halo on attention bloom. Appears when internal expressive components (A, N, ΔN) diverge significantly.
+
+### 2. Relational layer (ternary attractor plot)
+
+A small ternary plot inset in the bottom-right of the map shows all three regions in **coupling space**. Three vertices, three attractors:
+
+- **Top vertex** — expansion
+- **Bottom-right vertex** — contraction
+- **Bottom-left vertex** — instability
+
+Each region is plotted by its **proximity to the three attractors**, computed as inverse-square distance weights from its actual (C_align, C_sync) position to each attractor coordinate. Position in the triangle reads directly as attractor proximity.
+
+**Encoding:**
+- **Position** — barycentric weight by proximity to each attractor
+- **Colour** — region identity (US, UK, India each get a distinct hue)
+- **Size** — instability magnitude I
+- **Outer ring** — C_lag magnitude with directional colour (blue = M leads, amber = E leads)
+
+**Function:** The ternary plot is the inter-regional assemblage view. Three regions clustered near one vertex = global assemblage synchronized in that regime. Three regions spread across vertices = regional fragmentation, deterritorialisation at the inter-regional scale. Region colour stays constant; position changes — so trajectories are easy to track.
+
+The geometry is the model: three attractors define a triangular coupling space, and each national assemblage occupies a position determined by its actual coupling state. There are no axes to interpret — the named vertices *are* the navigational system.
+
+### 3. Analytical layer (per-region panels)
+
+A three-column grid of per-region panels below the map. Each panel displays:
+
+- **Coupling metrics** — C_align, C_sync (bars with neutral geometry, no regime colour bleed)
+- **Lead-lag** — C_lag with confidence weighting
+- **Instability** — I magnitude
+- **Narrative velocity** — N and ΔN
+- **Sparklines** — A, M, N history (rolling window)
+- **Cluster composition** — display only, not yet coupled (v3 direction)
+
+Panels provide analytical depth per region; the ternary plot provides relational simultaneity across regions; the map provides geographic and signal expression. No layer duplicates another — each does specific work.
+
+### Controls
+
+**Regime tilt strip** — horizontal gradient (expansion → instability → contraction). Cursor driven by mean C_sync across regions, encoding global synchrony state.
 
 ---
 
-## Related
+## Data sources
 
-- **Frontend:** [propensities/animal-spirits](https://github.com/propensities/animal-spirits) — `propensities.github.io/animal-spirits/`
+| Axis | Source | Method | Granularity | Availability |
+|------|--------|--------|-------------|--------------|
+| Attention (A) | Wikimedia Pageviews API — `en.wikipedia` | 32 articles per region (8 terms × 4 affect clusters), per-term z-score against own 30-day baseline | daily | 99.9 % |
+| Market (M) | Alpha Vantage ETF proxies (`SPY`, `ISF.LON`, `NIFTYBEES.BSE`) blended with FRED macro-stress series | 0.55 × local equity + 0.45 × global stress | daily closes | 100 % |
+| Narrative (N) | GDELT DOC 2.0 TimelineTone | one query per region, `sourcecountry` filtered, restricted to economic stress vocabulary | intraday | **50.1 %** |
+
+Availability measured across 1,173 refresh events, 15 May – 13 August 2026.
+
+Live status indicated by A● M● N● badge in the header. When a source is unavailable, the corresponding signal falls back to the synthetic model.
+
+**Backend:** GitHub Actions workflow in [`propensities/animal-spirits-api`](https://github.com/propensities/animal-spirits-api). Computes and normalises all three axes and writes `data/state.json`, served via GitHub Pages at `https://propensities.github.io/animal-spirits-api/data/state.json`. The frontend makes a single cache-busted fetch to this URL every 15 minutes — all signal processing happens upstream.
+
+The workflow is scheduled at 15-minute intervals, but observed cadence over 89.9 days is a median interval of **90 minutes** (≈13 refresh events per day), reflecting scheduled-workflow throttling on the hosting platform rather than source failure. See *Temporal resolution* below.
+
+---
+
+## Temporal resolution
+
+The three axes do not share a sampling rate, and the effective resolution of the composite is set by the slowest of them.
+
+Attention derives from daily Wikimedia pageview data. Market derives from daily closes, cached for six hours. Only narrative carries genuine intraday variation — and it is absent from roughly half of all observations, a rate that has increased over the observation period (UK nulls: 26 % in May, 53 % in June, 59 % in July).
+
+Observed consecutive-identical rates confirm this: market repeats between observations **83 %** of the time, attention **20 %**, narrative **6 %**.
+
+**Readings should therefore be understood as daily-resolution observations of coupling, refreshed opportunistically — not as real-time measurement.** The interface animates continuously; that animation renders state, and does not indicate that new information has arrived. `C_lag` accordingly indicates a daily-scale phase relationship, corroborated or not. It is not a measurement of intraday lead time.
+
+The processing buffers currently advance on the render tick rather than on data arrival, which means the same values are re-processed many times between fetches. Advancing one buffer step per `state.json` update — with back-fill from `history.jsonl` — would give `W_BUF` and `τ_max` defined durations. This is a known defect, documented rather than concealed, and a v3 priority.
+
+---
+
+## Comparability across regions
+
+The same model, weights, and attractor coordinates are applied to all three regions. This is a deliberate commitment to treating no region as baseline. It carries specific and unequal costs.
+
+**The macro-stress backdrop is not regionally differentiated.** All three FRED series (`VIXCLS`, `BAMLH0A0HYM2`, `DTWEXBGS`) are US instruments, and the identical stress scalar contributes 45 % of every region's market value. Some apparent inter-regional market coupling is a property of this construction rather than an observation. If a regional equity fetch fails while the macro series succeed, that region falls back to a value composed entirely of the global backdrop — and still reports as live.
+
+**Attention is read in English for all three regions.** Wikimedia serves Hindi, Bengali, Tamil and other editions through the same API on identical terms; they are not sampled. This is a selection, not an infrastructural constraint, and its effects are asymmetric: for the US and UK, `en.wikipedia` approximates the general reading public; for India it indexes an anglophone subset whose economic position is not representative of the population.
+
+**Narrative is anxiety-conditioned by construction.** The GDELT query is restricted to economic stress vocabulary, so N measures the tone of stress discourse rather than general economic media tone. This is deliberate — stress narratives propagate fastest — but it is not a neutral read of sentiment. GDELT's `sourcecountry` filter also selects by outlet location rather than audience, language, or subject.
+
+**Axis scales are not identical.** Narrative is bounded at ±0.762 by the `clip → tanh` sequence, while attention and market reach ±1.
+
+---
+
+## Known limitations and v3 directions
+
+**Scalar attention (current):** the four affect clusters are combined in the backend into a single weighted composite — `Σ(weight × cluster_z) / n`, weights anxiety −1.0, confidence +1.0, aspiration +0.5, constraint −0.7 — before `state.json` is written. The compositional structure of the affect field therefore does not reach coupling computation, and `getClusterBreakdown()` returns `null`. Expressive divergence partially exposes this tension.
+
+**v3 — vectorised attention:** A enters E as a 2D vector (valence × accumulation), with the four clusters as named quadrants. Each cluster carries its own coupling signature to the material field. Requires Google Trends Alpha or a richer sentiment pipeline via institutional credentials.
+
+**Symmetric synchrony (current):** C_sync is symmetric co-movement. It does not distinguish which field is driving which.
+
+**v3 — directional coupling:** Granger causality or lagged regression over longer windows.
+
+**Scalar E (current):** Distinct expressive configurations can produce identical E values. Expressive divergence partially exposes this.
+
+**v3 — vectorised E:** E as a 2D or 3D vector preserving internal structure through to coupling computation. Regime dynamics become cluster-aware.
+
+**Static attractor coordinates (current):** Attractor positions are configured constants. They do not adapt to regional variation in baseline coupling.
+
+**v3 — region-specific attractors:** Each region's attractor positions calibrated from its own historical distribution.
+
+---
+
+## Deployment
+
+- **Frontend:** `propensities.github.io/animal-spirits/` (GitHub Pages — [`propensities/animal-spirits`](https://github.com/propensities/animal-spirits))
+- **Backend:** `propensities.github.io/animal-spirits-api/data/state.json` (GitHub Pages — [`propensities/animal-spirits-api`](https://github.com/propensities/animal-spirits-api))
+- **Stack:** Vanilla HTML/JS/D3/Canvas · Python/GitHub Actions · GitHub Pages
+
+---
+
+## Version history
+
+| Version | Description |
+|---------|-------------|
+| v0.2 | Four affect clusters, three regions, simulated data, temporal layering per cluster |
+| v0.8 | Three axes (A/M/N), three regions, live data, regime probabilities from Ψ |
+| v1.0 | Signal processing layer, regime dynamics, global headline |
+| v1.1 | Legibility pass — posture vocabulary, axis key, tightened panels |
+| v2.0 | Coupling-based architecture — expressive/material separation, C_align/C_sync/C_lag, attractor-space regime, six-layer clean separation |
+| v2.1 | Quadrant inset restored as relational layer between map and panels |
+| v2.2 | Ternary attractor plot replaces cartesian quadrant — barycentric region positioning, region-identity dot colours, geometry directly expresses the three-attractor regime model |
 
 ---
 
