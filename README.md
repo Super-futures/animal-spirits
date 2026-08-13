@@ -34,9 +34,9 @@ The three observable axes map cleanly onto DeLanda's material/expressive distinc
 
 | Component | Axis | Source |
 |-----------|------|--------|
-| **Expressive** | Attention (A) — compositional | Wikimedia pageviews |
+| **Expressive** | Attention (A) — compositional | Wikimedia Pageviews (en.wikipedia) |
 | **Expressive** | Narrative (N) — dynamic, propagating | GDELT TimelineTone |
-| **Material** | Market (M) — realised behaviour | Yahoo Finance / FRED |
+| **Material** | Market (M) — realised behaviour | Alpha Vantage ETF proxies + FRED |
 
 Attention and narrative together compose the **expressive field (E)** — the addressed, dialogic substrate through which collective affect circulates. Market is the **material field (M)** — the realised behavioural discharge.
 
@@ -114,7 +114,7 @@ C_lag encodes *confident phase offset*: near-zero when the best-fit lag is weakl
 ### Instability
 
 ```
-I = clip( (1 − C_align) + (1 − |C_sync|) + C_lag, 0, 1 ) / 3
+I = min( 1, [ (1 − C_align) + (1 − |C_sync|) + C_lag ] / 3 )
 ```
 
 Instability is deterritorialisation: breakdown of coupling between expressive and material fields simultaneously across all three dimensions. It is not a third regime alongside expansion and contraction — it is a condition of the assemblage, a measure of how decoupled the components have become.
@@ -197,21 +197,53 @@ Panels provide analytical depth per region; the ternary plot provides relational
 
 ## Data sources
 
-| Axis | Source | Method | Status |
-|------|--------|--------|--------|
-| Market (M) | Yahoo Finance (via Alpha Vantage + FRED) | Backend — GitHub Actions | Live |
-| Attention (A) | Wikimedia Pageviews API | Backend — 4 cluster × 3 region terms | Live |
-| Narrative (N) | GDELT TimelineTone | Backend — per-region tone scalar | Live |
+| Axis | Source | Method | Granularity | Availability |
+|------|--------|--------|-------------|--------------|
+| Attention (A) | Wikimedia Pageviews API — `en.wikipedia` | 32 articles per region (8 terms × 4 affect clusters), per-term z-score against own 30-day baseline | daily | 99.9 % |
+| Market (M) | Alpha Vantage ETF proxies (`SPY`, `ISF.LON`, `NIFTYBEES.BSE`) blended with FRED macro-stress series | 0.55 × local equity + 0.45 × global stress | daily closes | 100 % |
+| Narrative (N) | GDELT DOC 2.0 TimelineTone | one query per region, `sourcecountry` filtered, restricted to economic stress vocabulary | intraday | **50.1 %** |
+
+Availability measured across 1,173 refresh events, 15 May – 13 August 2026.
 
 Live status indicated by A● M● N● badge in the header. When a source is unavailable, the corresponding signal falls back to the synthetic model.
 
-**Backend:** GitHub Actions workflow in `Super-futures/animal-spirits-api`. Runs on a schedule, computes and normalises all three axes, and writes `data/state.json` to the repo. The API repo has GitHub Pages enabled, serving `state.json` at `https://super-futures.github.io/animal-spirits-api/data/state.json` with permissive CORS headers. The frontend makes a single cache-busted fetch to this URL — all signal processing happens in the workflow.
+**Backend:** GitHub Actions workflow in [`propensities/animal-spirits-api`](https://github.com/propensities/animal-spirits-api). Computes and normalises all three axes and writes `data/state.json`, served via GitHub Pages at `https://propensities.github.io/animal-spirits-api/data/state.json`. The frontend makes a single cache-busted fetch to this URL every 15 minutes — all signal processing happens upstream.
+
+The workflow is scheduled at 15-minute intervals, but observed cadence over 89.9 days is a median interval of **90 minutes** (≈13 refresh events per day), reflecting scheduled-workflow throttling on the hosting platform rather than source failure. See *Temporal resolution* below.
+
+---
+
+## Temporal resolution
+
+The three axes do not share a sampling rate, and the effective resolution of the composite is set by the slowest of them.
+
+Attention derives from daily Wikimedia pageview data. Market derives from daily closes, cached for six hours. Only narrative carries genuine intraday variation — and it is absent from roughly half of all observations, a rate that has increased over the observation period (UK nulls: 26 % in May, 53 % in June, 59 % in July).
+
+Observed consecutive-identical rates confirm this: market repeats between observations **83 %** of the time, attention **20 %**, narrative **6 %**.
+
+**Readings should therefore be understood as daily-resolution observations of coupling, refreshed opportunistically — not as real-time measurement.** The interface animates continuously; that animation renders state, and does not indicate that new information has arrived. `C_lag` accordingly indicates a daily-scale phase relationship, corroborated or not. It is not a measurement of intraday lead time.
+
+The processing buffers currently advance on the render tick rather than on data arrival, which means the same values are re-processed many times between fetches. Advancing one buffer step per `state.json` update — with back-fill from `history.jsonl` — would give `W_BUF` and `τ_max` defined durations. This is a known defect, documented rather than concealed, and a v3 priority.
+
+---
+
+## Comparability across regions
+
+The same model, weights, and attractor coordinates are applied to all three regions. This is a deliberate commitment to treating no region as baseline. It carries specific and unequal costs.
+
+**The macro-stress backdrop is not regionally differentiated.** All three FRED series (`VIXCLS`, `BAMLH0A0HYM2`, `DTWEXBGS`) are US instruments, and the identical stress scalar contributes 45 % of every region's market value. Some apparent inter-regional market coupling is a property of this construction rather than an observation. If a regional equity fetch fails while the macro series succeed, that region falls back to a value composed entirely of the global backdrop — and still reports as live.
+
+**Attention is read in English for all three regions.** Wikimedia serves Hindi, Bengali, Tamil and other editions through the same API on identical terms; they are not sampled. This is a selection, not an infrastructural constraint, and its effects are asymmetric: for the US and UK, `en.wikipedia` approximates the general reading public; for India it indexes an anglophone subset whose economic position is not representative of the population.
+
+**Narrative is anxiety-conditioned by construction.** The GDELT query is restricted to economic stress vocabulary, so N measures the tone of stress discourse rather than general economic media tone. This is deliberate — stress narratives propagate fastest — but it is not a neutral read of sentiment. GDELT's `sourcecountry` filter also selects by outlet location rather than audience, language, or subject.
+
+**Axis scales are not identical.** Narrative is bounded at ±0.762 by the `clip → tanh` sequence, while attention and market reach ±1.
 
 ---
 
 ## Known limitations and v3 directions
 
-**Scalar attention (current):** A enters E as a scalar (RMS of four cluster terms). The compositional structure of the affect field does not enter coupling computation. Expressive divergence partially exposes this tension.
+**Scalar attention (current):** the four affect clusters are combined in the backend into a single weighted composite — `Σ(weight × cluster_z) / n`, weights anxiety −1.0, confidence +1.0, aspiration +0.5, constraint −0.7 — before `state.json` is written. The compositional structure of the affect field therefore does not reach coupling computation, and `getClusterBreakdown()` returns `null`. Expressive divergence partially exposes this tension.
 
 **v3 — vectorised attention:** A enters E as a 2D vector (valence × accumulation), with the four clusters as named quadrants. Each cluster carries its own coupling signature to the material field. Requires Google Trends Alpha or a richer sentiment pipeline via institutional credentials.
 
@@ -231,8 +263,8 @@ Live status indicated by A● M● N● badge in the header. When a source is un
 
 ## Deployment
 
-- **Frontend:** `super-futures.github.io/animalspirits` (GitHub Pages — `Super-futures/animalspirits`)
-- **Backend:** `super-futures.github.io/animal-spirits-api/data/state.json` (GitHub Pages — `Super-futures/animal-spirits-api`)
+- **Frontend:** `propensities.github.io/animal-spirits/` (GitHub Pages — [`propensities/animal-spirits`](https://github.com/propensities/animal-spirits))
+- **Backend:** `propensities.github.io/animal-spirits-api/data/state.json` (GitHub Pages — [`propensities/animal-spirits-api`](https://github.com/propensities/animal-spirits-api))
 - **Stack:** Vanilla HTML/JS/D3/Canvas · Python/GitHub Actions · GitHub Pages
 
 ---
@@ -251,4 +283,4 @@ Live status indicated by A● M● N● badge in the header. When a source is un
 
 ---
 
-*Superfutures · v2.2*
+*Propensities · v2.2*
