@@ -229,9 +229,9 @@ The same model, weights, and attractor coordinates are applied to all three regi
 
 The macro-stress backdrop is drawn from US instruments (`VIXCLS`, `BAMLH0A0HYM2`, `DTWEXBGS`) and contributes 45% of every region's market value, so the three regional market signals share a common component.
 
-Attention is read from `en.wikipedia` for all three regions. Wikimedia serves Hindi, Bengali, Tamil and other editions through the same API; they are not currently sampled. The effect is asymmetric — for the US and UK, `en.wikipedia` approximates the general reading public; for India it indexes an anglophone subset.
+Attention is read from `en.wikipedia` for all three regions. Other language editions are not sampled, though roughly 85–92% of Indian Wikipedia pageviews already go to the English edition. The larger asymmetry is in reach rather than language: per head of population, English Wikipedia receives around 8.8 pageviews per person in the US and 10.6 in the UK against 0.4 in India (July 2026). For the US and UK it approximates the general reading public; for India it indexes a smaller and more anglophone stratum.
 
-Narrative is restricted to economic stress vocabulary, so N measures the tone of stress discourse rather than general economic media tone. GDELT's `sourcecountry` filter selects by outlet location rather than audience, language, or subject.
+Narrative is restricted to economic stress vocabulary, so N measures the tone of stress discourse rather than general economic media tone. GDELT's `sourcecountry` filter selects by outlet location rather than audience, language, or subject; independent assessment finds Western and particularly US media over-represented within GDELT's index.
 
 Axis scales are not identical: N is bounded at ±0.762 by the `clip → tanh` sequence, while A and M reach ±1.
 
